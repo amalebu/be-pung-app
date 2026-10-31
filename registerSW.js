@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/be-pung-app/sw.js', { scope: '/be-pung-app/' })})}
