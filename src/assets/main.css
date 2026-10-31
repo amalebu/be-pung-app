@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ==========================================================================
+   Serene Pod Tactile — fonts disimpan lokal (offline-first, SIL OFL license)
+   ========================================================================== */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('./fonts/plus-jakarta-sans-latin-wght-normal.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url('./fonts/plus-jakarta-sans-latin-wght-italic.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('./fonts/space-grotesk-latin-wght-normal.woff2') format('woff2');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-label: 'Space Grotesk', ui-monospace, 'SF Mono', monospace;
+
+  /* Brand tokens (semantic) */
+  --color-pod-carbon: #1a1e1b;
+  --color-pod-sage: #4a6b53;
+  --color-pod-sage-deep: #32533c;
+  --color-pod-lime: #d4f34a;
+  --color-pod-mist: #f4f7f4;
+  --color-pod-well: #eaefea;
+  --color-pod-live: #22c55e;
+
+  /* Material-style semantic tokens (light) */
+  --color-surface: #f7faf7;
+  --color-surface-lowest: #ffffff;
+  --color-surface-low: #f1f4f1;
+  --color-surface-container: #ecefec;
+  --color-on-surface: #181c1b;
+  --color-on-surface-variant: #424842;
+  --color-outline: #727972;
+  --color-outline-variant: #c2c8c0;
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  /* indigo -> sage scale (kelas brand lama otomatis ikut) */
+  --color-indigo-50: #f0f6f1;
+  --color-indigo-100: #e0ede3;
+  --color-indigo-200: #c7ecce;
+  --color-indigo-300: #abcfb2;
+  --color-indigo-400: #7fa689;
+  --color-indigo-500: #5c8366;
+  --color-indigo-600: #4a6b53;
+  --color-indigo-700: #32533c;
+  --color-indigo-800: #2e4e37;
+  --color-indigo-900: #1f3626;
+  --color-indigo-950: #01210f;
+
+  /* slate -> mist neutrals (light mode) */
+  --color-slate-50: #f7faf7;
+  --color-slate-100: #ecefec;
+  --color-slate-200: #e0e3e0;
+  --color-slate-300: #c2c8c0;
+  --color-slate-400: #9aa39b;
+  --color-slate-500: #727972;
+  --color-slate-600: #5a615a;
+  --color-slate-700: #424842;
+  --color-slate-800: #2d3130;
+  --color-slate-900: #181c1b;
+  --color-slate-950: #0f1210;
+
+  /* zinc -> dark green tiers (dark mode) */
+  --color-zinc-50: #f7faf7;
+  --color-zinc-100: #eef1ee;
+  --color-zinc-200: #dde3de;
+  --color-zinc-300: #c4ccc5;
+  --color-zinc-400: #a3ada5;
+  --color-zinc-500: #7a857d;
+  --color-zinc-600: #55615a;
+  --color-zinc-700: #3a4640;
+  --color-zinc-800: #2a352d;
+  --color-zinc-900: #1e2520;
+  --color-zinc-950: #121613;
+
+  /* Radii bernama (skala rounded-* bawaan Tailwind tidak diubah) */
+  --radius-pod: 1.5rem;
+  --radius-pod-lg: 2rem;
+
+  /* Depth */
+  --shadow-surface: 0 10px 30px -5px rgba(28, 48, 33, 0.06), 0 2px 6px rgba(28, 48, 33, 0.03);
+  --shadow-well: inset 0 2px 4px rgba(22, 38, 26, 0.08), inset 0 -1px 2px rgba(255, 255, 255, 0.7);
+  --shadow-floating: 0 12px 24px -4px rgba(26, 30, 27, 0.12), 0 4px 8px -2px rgba(26, 30, 27, 0.06);
+  --shadow-bio-glow: 0 0 16px 2px rgba(212, 243, 74, 0.45);
+
+  --animate-pin-shake: pin-shake 0.38s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes pin-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .bottom-safe-nav {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 4.5rem);
+  }
+
+  /* Label hardware-embossed: ACTIVE POD | 01 */
+  .label-caps {
+    font-family: var(--font-label);
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+}
