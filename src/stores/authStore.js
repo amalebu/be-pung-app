@@ -126,10 +126,13 @@ export const useAuthStore = defineStore('auth', () => {
       return { success: true, data: res.data }
     } catch (err) {
       const responseData = err.response?.data
+      const defaultMsg = (!err.response || err.response.status >= 500 || typeof responseData !== 'object')
+        ? 'Gagal menghubungkan ke server backend.'
+        : 'Format nomor ponsel tidak valid.'
       errorMessage.value =
         responseData?.errors?.phone?.[0] ||
         responseData?.message ||
-        'Format nomor ponsel tidak valid.'
+        defaultMsg
       validationErrors.value = responseData?.errors || {}
       return { success: false, error: responseData }
     } finally {

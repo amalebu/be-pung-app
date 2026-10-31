@@ -1,7 +1,17 @@
 import axios from 'axios'
 
+function getApiBaseUrl() {
+  const envUrl = import.meta.env.VITE_API_BASE_URL
+  if (typeof window !== 'undefined' && window.location.hostname.endsWith('github.io')) {
+    if (!envUrl || envUrl.startsWith('/')) {
+      return 'https://9knv83ss-8000.asse.devtunnels.ms/api/v1/personal-app'
+    }
+  }
+  return envUrl || 'https://9knv83ss-8000.asse.devtunnels.ms/api/v1/personal-app'
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://9knv83ss-8000.asse.devtunnels.ms/api/v1/personal-app',
+  baseURL: getApiBaseUrl(),
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
