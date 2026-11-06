@@ -4,7 +4,8 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'node:url'
 
-const baseUrl = process.env.NODE_ENV === 'production' ? '/be-pung-app/' : '/'
+const isGitHubPages = process.env.GITHUB_ACTIONS === 'true' || process.env.VITE_BASE_PATH === '/be-pung-app/'
+const baseUrl = isGitHubPages ? '/be-pung-app/' : '/'
 
 export default defineConfig({
   base: baseUrl,
@@ -16,23 +17,57 @@ export default defineConfig({
       devOptions: {
         enabled: true,
       },
-      includeAssets: ['favicon.ico', 'pwa-icon.svg'],
+      includeAssets: [
+        'favicon.ico',
+        'pwa-icon.svg',
+        'apple-touch-icon.png',
+        'pwa-192x192.png',
+        'pwa-512x512.png',
+        'pwa-maskable-192x192.png',
+        'pwa-maskable-512x512.png',
+      ],
       manifest: {
+        id: baseUrl,
         name: 'PersonalApp — Dashboard & Produktivitas',
         short_name: 'PersonalApp',
         description: 'Dashboard Manajemen Pribadi, Finansial, dan Kebiasaan Harian',
-        theme_color: '#4a6b53',
-        background_color: '#f7faf7',
+        theme_color: '#ffffff',
+        background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
         scope: baseUrl,
         start_url: baseUrl,
+        categories: ['productivity', 'finance', 'lifestyle'],
         icons: [
           {
+            src: `${baseUrl}pwa-192x192.png`,
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: `${baseUrl}pwa-512x512.png`,
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: `${baseUrl}pwa-maskable-192x192.png`,
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+          {
+            src: `${baseUrl}pwa-maskable-512x512.png`,
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+          {
             src: `${baseUrl}pwa-icon.svg`,
-            sizes: '192x192 512x512',
+            sizes: 'any',
             type: 'image/svg+xml',
-            purpose: 'any maskable',
+            purpose: 'any',
           },
         ],
       },
@@ -47,6 +82,9 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
+  },
+  optimizeDeps: {
+    include: ['@iconoir/vue'],
   },
   server: {
     host: true,

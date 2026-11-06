@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { Flag } from 'lucide-vue-next'
+import { TriangleFlag } from '@iconoir/vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 
 const props = defineProps({
@@ -36,7 +36,7 @@ const config = computed(() => {
 
 <template>
   <BaseBadge :variant="config.variant" :size="size">
-    <Flag class="w-2.5 h-2.5 fill-current" />
+    <TriangleFlag class="w-2.5 h-2.5 fill-current" />
     <span>{{ config.label }}</span>
   </BaseBadge>
 </template>

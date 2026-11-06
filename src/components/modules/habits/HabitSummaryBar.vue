@@ -1,10 +1,5 @@
 <script setup>
-import {
-  Sparkles,
-  CheckCircle2,
-  ShieldAlert,
-  Flame,
-} from 'lucide-vue-next'
+import { Spark, CheckCircle, ShieldAlert, FireFlame } from '@iconoir/vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
@@ -44,7 +39,7 @@ const emit = defineEmits(['select-type'])
           <BaseText size="xs" variant="muted" weight="medium">
             Semua Habit
           </BaseText>
-          <Sparkles class="w-4 h-4 text-indigo-500 shrink-0" />
+          <Spark class="w-4 h-4 text-indigo-500 shrink-0" />
         </div>
         <BaseHeading as="p" size="xl" weight="bold" tabular class="mt-1.5">
           {{ summary.total ?? 0 }}
@@ -71,7 +66,7 @@ const emit = defineEmits(['select-type'])
           <BaseText size="xs" variant="muted" weight="medium">
             Good Habit Hari Ini
           </BaseText>
-          <CheckCircle2 class="w-4 h-4 text-emerald-500 shrink-0" />
+          <CheckCircle class="w-4 h-4 text-emerald-500 shrink-0" />
         </div>
         <BaseHeading as="p" size="xl" weight="bold" tabular class="mt-1.5 text-emerald-600 dark:text-emerald-400">
           {{ summary.good_completed_today ?? 0 }} / {{ summary.good_count ?? 0 }}
@@ -112,7 +107,7 @@ const emit = defineEmits(['select-type'])
         <BaseText size="xs" variant="muted" weight="medium">
           Streak Terbaik
         </BaseText>
-        <Flame class="w-4 h-4 text-amber-500 shrink-0" />
+        <FireFlame class="w-4 h-4 text-amber-500 shrink-0" />
       </div>
       <BaseHeading as="p" size="xl" weight="bold" tabular class="mt-1.5 text-amber-600 dark:text-amber-400">
         {{ summary.best_streak ?? 0 }} <span class="text-xs font-medium text-slate-500 dark:text-zinc-400">hari</span>

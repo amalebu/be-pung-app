@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
-import { Delete } from 'lucide-vue-next'
+import { Erase } from '@iconoir/vue'
 
 const props = defineProps({
   disabled: {
@@ -18,7 +18,7 @@ const rows = [
 ]
 
 const keyClass =
-  'h-16 w-16 mx-auto rounded-md flex items-center justify-center text-2xl font-medium tabular-nums text-pod-carbon dark:text-zinc-100 bg-white dark:bg-zinc-800 border border-pod-sage/10 dark:border-zinc-700/60 shadow-surface hover:shadow-floating active:scale-95 active:shadow-well active:bg-pod-lime active:text-pod-carbon dark:active:bg-pod-lime dark:active:text-pod-carbon transition-all duration-100 cursor-pointer disabled:opacity-40 disabled:pointer-events-none'
+  'h-14 w-full rounded-2xl bg-white dark:bg-zinc-800/90 border border-slate-200/80 dark:border-zinc-700/60 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:bg-slate-50 dark:hover:bg-zinc-700/70 active:scale-95 flex items-center justify-center transition-all cursor-pointer disabled:opacity-40 disabled:pointer-events-none select-none'
 
 function pressDigit(num) {
   if (props.disabled) return
@@ -51,8 +51,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="w-full max-w-[300px] mx-auto select-none">
-    <div class="grid grid-cols-3 gap-y-3 gap-x-5">
+  <div class="w-full max-w-[320px] mx-auto select-none">
+    <div class="grid grid-cols-3 gap-3">
       <template v-for="(row, rIdx) in rows" :key="rIdx">
         <button
           v-for="num in row"
@@ -62,34 +62,38 @@ onUnmounted(() => {
           @click="pressDigit(num)"
           :class="keyClass"
         >
-          {{ num }}
+          <span class="text-[24px] font-semibold text-slate-900 dark:text-zinc-100 leading-none tabular-nums">
+            {{ num }}
+          </span>
         </button>
       </template>
 
-      <!-- Bottom Left Slot (e.g. Cancel / Logout / Empty) -->
-      <div class="h-16 w-16 mx-auto flex items-center justify-center">
+      <!-- Bottom Row Left: Slot (e.g. Biometric / Empty Spacer) -->
+      <div class="h-14 flex items-center justify-center">
         <slot name="bottom-left" />
       </div>
 
-      <!-- Digit 0 -->
+      <!-- Bottom Row Center: Digit 0 -->
       <button
         type="button"
         :disabled="disabled"
         @click="pressDigit('0')"
         :class="keyClass"
       >
-        0
+        <span class="text-[24px] font-semibold text-slate-900 dark:text-zinc-100 leading-none tabular-nums">
+          0
+        </span>
       </button>
 
-      <!-- Backspace Button -->
+      <!-- Bottom Row Right: Backspace / Delete -->
       <button
         type="button"
         :disabled="disabled"
         @click="pressBackspace"
         aria-label="Hapus angka"
-        class="h-16 w-16 mx-auto rounded-md flex items-center justify-center text-slate-600 dark:text-zinc-400 hover:bg-pod-well dark:hover:bg-zinc-800 active:scale-90 active:bg-pod-well transition-all duration-100 cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+        class="h-14 w-full rounded-2xl bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 flex items-center justify-center text-slate-600 dark:text-zinc-400 transition-all cursor-pointer disabled:opacity-40 disabled:pointer-events-none select-none"
       >
-        <Delete class="w-6 h-6" />
+        <Erase class="w-6 h-6" />
       </button>
     </div>
   </div>

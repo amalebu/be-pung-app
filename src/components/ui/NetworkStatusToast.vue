@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { WifiOff, Wifi, RefreshCw, CheckCircle2 } from 'lucide-vue-next'
+import { WifiOff, Wifi, Refresh, CheckCircle } from '@iconoir/vue'
 import { useNetworkStore } from '@/stores/networkStore'
 
 const networkStore = useNetworkStore()
@@ -49,11 +49,11 @@ const isOfflineMode = computed(() => !networkStore.isOnline)
 
           <!-- Back Online & Syncing State (YouTube Green Bar) -->
           <template v-else>
-            <RefreshCw
+            <Refresh
               v-if="networkStore.isSyncing"
               class="w-3.5 h-3.5 animate-spin shrink-0"
             />
-            <CheckCircle2
+            <CheckCircle
               v-else
               class="w-3.5 h-3.5 shrink-0"
             />

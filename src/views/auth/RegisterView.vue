@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { UserPlus, ShieldCheck } from 'lucide-vue-next'
+import { UserPlus, ShieldCheck } from '@iconoir/vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import PrimaryButton from '@/components/ui/PrimaryButton.vue'

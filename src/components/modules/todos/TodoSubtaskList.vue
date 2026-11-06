@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { Check, Plus, Trash2 } from 'lucide-vue-next'
+import { Check, Plus, Trash } from '@iconoir/vue'
 
 const props = defineProps({
   todoId: {
@@ -72,7 +72,7 @@ async function handleAddSubtask() {
           class="w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer shrink-0"
           title="Hapus sub-checklist"
         >
-          <Trash2 class="w-3.5 h-3.5" />
+          <Trash class="w-3.5 h-3.5" />
         </button>
       </div>
     </div>

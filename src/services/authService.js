@@ -1,13 +1,19 @@
 import api from './api'
+import { sanitizePhone } from '@/utils/phoneUtils'
 
 export const authService = {
   async checkPhone(phone) {
-    const response = await api.post('/auth/phone/check', { phone })
+    const sanitized = sanitizePhone(phone)
+    const response = await api.post('/auth/phone/check', { phone: sanitized })
     return response.data
   },
 
   async authenticateWithPhonePin(payload) {
-    const response = await api.post('/auth/phone/pin', payload)
+    const data = {
+      ...payload,
+      phone: sanitizePhone(payload.phone),
+    }
+    const response = await api.post('/auth/phone/pin', data)
     return response.data
   },
 
@@ -32,7 +38,11 @@ export const authService = {
   },
 
   async register(payload) {
-    const response = await api.post('/auth/register', payload)
+    const data = { ...payload }
+    if (data.phone) {
+      data.phone = sanitizePhone(data.phone)
+    }
+    const response = await api.post('/auth/register', data)
     return response.data
   },
 
@@ -52,7 +62,25 @@ export const authService = {
   },
 
   async updateProfile(payload) {
-    const response = await api.put('/auth/profile', payload)
+    const data = { ...payload }
+    if (data.phone) {
+      data.phone = sanitizePhone(data.phone)
+    }
+    const response = await api.put('/auth/profile', data)
+    return response.data
+  },
+
+  async linkGoogle(payload) {
+    const response = await api.post('/auth/google/link', payload)
+    return response.data
+  },
+
+  async linkPhone(payload) {
+    const data = {
+      ...payload,
+      phone: sanitizePhone(payload.phone),
+    }
+    const response = await api.post('/auth/phone/link', data)
     return response.data
   },
 }

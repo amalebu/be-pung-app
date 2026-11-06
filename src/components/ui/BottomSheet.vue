@@ -1,5 +1,5 @@
 <script setup>
-import { X } from 'lucide-vue-next'
+import { Xmark } from '@iconoir/vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 
 defineProps({
@@ -66,7 +66,7 @@ const emit = defineEmits(['close'])
               @click="emit('close')"
               class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
             >
-              <X class="w-4 h-4" />
+              <Xmark class="w-4 h-4" />
             </button>
           </div>
 

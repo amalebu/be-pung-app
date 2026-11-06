@@ -36,11 +36,11 @@ const isActive = computed(() => {
 <template>
   <router-link
     :to="to"
-    class="flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-md text-sm font-medium transition-all cursor-pointer"
+    class="flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-full text-sm font-semibold transition-all cursor-pointer"
     :class="[
       isActive
-        ? 'bg-pod-carbon text-white dark:bg-pod-lime dark:text-pod-carbon shadow-floating'
-        : 'text-slate-600 dark:text-zinc-400 hover:bg-pod-well dark:hover:bg-zinc-800/60 hover:text-slate-900 dark:hover:text-zinc-100',
+        ? 'bg-[#144229] text-white dark:bg-[#a1d2af] dark:text-[#002110] shadow-[0px_4px_16px_rgba(20,66,41,0.18)]'
+        : 'text-slate-600 dark:text-zinc-400 hover:bg-[#f3f3f6] dark:hover:bg-zinc-800/60 hover:text-slate-900 dark:hover:text-zinc-100',
     ]"
     :title="collapsed ? name : ''"
   >

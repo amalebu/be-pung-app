@@ -1,17 +1,16 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { ShieldCheck } from 'lucide-vue-next'
 import PinBoxes from '@/components/ui/PinBoxes.vue'
 import PinNumpad from '@/components/ui/PinNumpad.vue'
 
 const props = defineProps({
   title: {
     type: String,
-    default: 'Masukkan PIN Anda',
+    default: 'Masukan PIN',
   },
   subtitle: {
     type: String,
-    default: 'Masukkan 6 digit PIN keamanan akun Anda',
+    default: '',
   },
   errorMessage: {
     type: String,
@@ -68,26 +67,19 @@ defineExpose({ resetPin })
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col justify-between w-full py-2">
-    <!-- Top Info & PIN Boxes -->
-    <div class="text-center space-y-5 pt-4">
-      <div
-        class="w-12 h-12 rounded-md bg-pod-sage text-white flex items-center justify-center mx-auto shadow-floating"
-      >
-        <ShieldCheck class="w-6 h-6" />
-      </div>
-
-      <div class="space-y-2 px-2">
-        <h1
-          class="text-[28px] leading-9 font-normal tracking-[-0.02em] text-slate-900 dark:text-zinc-100"
-        >
+  <div class="flex-1 flex flex-col justify-between w-full max-w-sm mx-auto select-none items-center py-2">
+    <!-- Top: Title, Subtitle, & PIN Boxes (Tanpa Logo / Icon) -->
+    <div class="w-full flex flex-col items-center text-center pt-2">
+      <div class="flex flex-col items-center text-center gap-1">
+        <h1 class="text-[28px] leading-tight text-slate-900 dark:text-zinc-100 tracking-tight font-medium">
           {{ title }}
         </h1>
-        <p class="text-sm leading-relaxed text-slate-500 dark:text-zinc-400 italic">
+        <p v-if="subtitle" class="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed mt-1 max-w-xs">
           {{ subtitle }}
         </p>
       </div>
 
+      <!-- 6-Digit Pod Tactile Cells -->
       <PinBoxes
         :value="pin"
         :length="6"
@@ -95,21 +87,23 @@ defineExpose({ resetPin })
         :loading="loading"
       />
 
-      <div class="min-h-[24px] px-4">
+      <!-- Helper / Error Message Container -->
+      <div class="min-h-[24px] px-4 text-center">
         <p
           v-if="errorMessage"
-          class="text-xs font-medium text-error dark:text-rose-300"
+          class="text-xs font-semibold text-rose-600 dark:text-rose-400"
         >
           {{ errorMessage }}
         </p>
         <p v-else-if="loading" class="text-xs text-slate-500 dark:text-zinc-400">
-          Memverifikasi PIN...
+          Memvalidasi PIN...
         </p>
+        <slot name="below-pin" />
       </div>
     </div>
 
-    <!-- Bottom On-Screen Numpad (keyboard virtual) -->
-    <div class="pb-2 space-y-4">
+    <!-- Bottom: Virtual Tactile Numpad Grid -->
+    <div class="w-full pb-[calc(env(safe-area-inset-bottom,0px)+3rem)] flex flex-col items-center gap-4 mt-auto pt-2">
       <PinNumpad
         :disabled="loading"
         @digit="handleDigit"

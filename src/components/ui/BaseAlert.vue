@@ -1,5 +1,5 @@
 <script setup>
-import { AlertCircle, CheckCircle2, Info } from 'lucide-vue-next'
+import { WarningCircle, CheckCircle, InfoCircle } from '@iconoir/vue'
 
 defineProps({
   variant: {
@@ -29,9 +29,9 @@ defineProps({
         : '',
     ]"
   >
-    <AlertCircle v-if="variant === 'error'" class="w-4 h-4 mt-0.5 shrink-0" />
-    <CheckCircle2 v-else-if="variant === 'success'" class="w-4 h-4 mt-0.5 shrink-0" />
-    <Info v-else class="w-4 h-4 mt-0.5 shrink-0" />
+    <WarningCircle v-if="variant === 'error'" class="w-4 h-4 mt-0.5 shrink-0" />
+    <CheckCircle v-else-if="variant === 'success'" class="w-4 h-4 mt-0.5 shrink-0" />
+    <InfoCircle v-else class="w-4 h-4 mt-0.5 shrink-0" />
     <span>{{ message }}</span>
   </div>
 </template>

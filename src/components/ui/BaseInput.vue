@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Eye, EyeOff } from 'lucide-vue-next'
+import { Eye, EyeClosed } from '@iconoir/vue'
 
 const props = defineProps({
   modelValue: {
@@ -85,12 +85,12 @@ const errorText = computed(() => {
         :autocomplete="autocomplete"
         :disabled="disabled"
         @input="emit('update:modelValue', $event.target.value)"
-        class="w-full rounded-md px-4 py-3 text-sm bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 border transition-all focus:outline-none focus:ring-4 disabled:opacity-60"
+        class="w-full rounded-xl px-4 py-3 text-sm bg-[#f3f3f6] dark:bg-zinc-800/80 text-[#1a1c1e] dark:text-[#f0f0f3] placeholder:text-[#717972] border transition-all focus:outline-none focus:ring-4 disabled:opacity-60"
         :class="[
           type === 'password' ? 'pr-10' : '',
           errorText
             ? 'border-rose-500 dark:border-rose-500/80 focus:ring-rose-500/15 focus:border-rose-500'
-            : 'border-pod-sage/15 dark:border-zinc-800 focus:ring-indigo-500/10 focus:border-indigo-600 dark:focus:border-indigo-400',
+            : 'border-[#e2e2e5] dark:border-zinc-700/60 focus:ring-[#144229]/15 focus:border-[#144229] dark:focus:border-[#a1d2af] dark:focus:ring-[#a1d2af]/20',
         ]"
       />
 
@@ -102,7 +102,7 @@ const errorText = computed(() => {
         class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:text-zinc-500 dark:hover:text-zinc-300 cursor-pointer"
         :title="showPassword ? 'Sembunyikan password' : 'Lihat password'"
       >
-        <EyeOff v-if="showPassword" class="w-4 h-4" />
+        <EyeClosed v-if="showPassword" class="w-4 h-4" />
         <Eye v-else class="w-4 h-4" />
       </button>
     </div>

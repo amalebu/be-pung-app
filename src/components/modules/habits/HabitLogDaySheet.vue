@@ -1,10 +1,11 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { Calendar, Plus, Minus } from 'lucide-vue-next'
+import { Calendar, Plus, Minus } from '@iconoir/vue'
 import BottomSheet from '@/components/ui/BottomSheet.vue'
 import PrimaryButton from '@/components/ui/PrimaryButton.vue'
 import SecondaryButton from '@/components/ui/SecondaryButton.vue'
 import BaseText from '@/components/ui/BaseText.vue'
+import { formatDateJakarta } from '@/utils/dateUtils'
 
 const props = defineProps({
   show: {
@@ -33,7 +34,7 @@ const formattedDateLabel = computed(() => {
   if (!dStr) return ''
   const [y, m, d] = dStr.split('-').map(Number)
   const dateObj = new Date(y, m - 1, d)
-  return dateObj.toLocaleDateString('id-ID', {
+  return formatDateJakarta(dateObj, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',

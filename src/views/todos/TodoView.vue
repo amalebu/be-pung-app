@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { Plus, CheckSquare, Sparkles } from 'lucide-vue-next'
+import { Plus, CheckSquare, Spark } from '@iconoir/vue'
 import AppShell from '@/components/layout/AppShell.vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
@@ -10,6 +10,7 @@ import TodoSummaryBar from '@/components/modules/todos/TodoSummaryBar.vue'
 import TodoFilterTabs from '@/components/modules/todos/TodoFilterTabs.vue'
 import TodoCard from '@/components/modules/todos/TodoCard.vue'
 import { useTodoStore } from '@/stores/todoStore'
+import { getJakartaTodayStr } from '@/utils/dateUtils'
 
 const todoStore = useTodoStore()
 let searchDebounceTimer = null
@@ -26,8 +27,7 @@ function handleSearchUpdate(val) {
 async function handleQuickAdd() {
   const title = quickTitle.value.trim()
   if (!title) return
-  const today = new Date()
-  const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+  const dateStr = getJakartaTodayStr(0)
   quickTitle.value = ''
   await todoStore.createTodo({
     title,
@@ -89,7 +89,7 @@ onMounted(() => {
         class="flex items-center gap-2 bg-white dark:bg-zinc-900 p-2 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-2xs"
       >
         <div class="pl-2.5 text-indigo-500">
-          <Sparkles class="w-4 h-4" />
+          <Spark class="w-4 h-4" />
         </div>
         <input
           v-model="quickTitle"

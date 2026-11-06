@@ -1,10 +1,5 @@
 <script setup>
-import {
-  ListTodo,
-  CalendarClock,
-  AlertTriangle,
-  CheckCircle2,
-} from 'lucide-vue-next'
+import { TaskList, Calendar, WarningTriangle, CheckCircle } from '@iconoir/vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
@@ -27,7 +22,7 @@ const cards = [
     key: 'all',
     countKey: 'active',
     label: 'Tugas Aktif',
-    icon: ListTodo,
+    icon: TaskList,
     iconColor: 'text-indigo-600 dark:text-indigo-400',
     activeBorder: 'ring-2 ring-indigo-500/40 border-indigo-400 dark:border-indigo-500',
   },
@@ -35,7 +30,7 @@ const cards = [
     key: 'today',
     countKey: 'today',
     label: 'Hari Ini',
-    icon: CalendarClock,
+    icon: Calendar,
     iconColor: 'text-amber-500 dark:text-amber-400',
     activeBorder: 'ring-2 ring-amber-500/40 border-amber-400 dark:border-amber-500',
   },
@@ -43,7 +38,7 @@ const cards = [
     key: 'overdue',
     countKey: 'overdue',
     label: 'Terlambat',
-    icon: AlertTriangle,
+    icon: WarningTriangle,
     iconColor: 'text-rose-600 dark:text-rose-400',
     activeBorder: 'ring-2 ring-rose-500/40 border-rose-400 dark:border-rose-500',
   },
@@ -51,7 +46,7 @@ const cards = [
     key: 'completed',
     countKey: 'completed',
     label: 'Selesai',
-    icon: CheckCircle2,
+    icon: CheckCircle,
     iconColor: 'text-emerald-600 dark:text-emerald-400',
     activeBorder: 'ring-2 ring-emerald-500/40 border-emerald-400 dark:border-emerald-500',
   },

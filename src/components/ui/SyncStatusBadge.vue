@@ -1,5 +1,5 @@
 <script setup>
-import { WifiOff, RefreshCw, CheckCircle2, CloudUpload } from 'lucide-vue-next'
+import { WifiOff, Refresh, CheckCircle, CloudUpload } from '@iconoir/vue'
 import { useNetworkStore } from '@/stores/networkStore'
 
 const networkStore = useNetworkStore()
@@ -33,7 +33,7 @@ function handleManualSync() {
     v-else-if="networkStore.isSyncing"
     class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60 tabular-nums"
   >
-    <RefreshCw class="w-3.5 h-3.5 animate-spin shrink-0" />
+    <Refresh class="w-3.5 h-3.5 animate-spin shrink-0" />
     <span class="hidden sm:inline">Menyinkronkan...</span>
   </div>
 
@@ -55,7 +55,7 @@ function handleManualSync() {
     class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/40"
     title="Data tersimpan di perangkat & tersinkronisasi dengan server"
   >
-    <CheckCircle2 class="w-3.5 h-3.5 shrink-0" />
+    <CheckCircle class="w-3.5 h-3.5 shrink-0" />
     <span class="hidden md:inline text-[11px]">Tersinkron</span>
   </div>
 </template>

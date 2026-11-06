@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import { getHabitCellVisual, getTodayDateStr } from '@/stores/habitStore'
+import { formatDateJakarta } from '@/utils/dateUtils'
 
 const props = defineProps({
   habit: {
@@ -66,7 +67,7 @@ const weeksGrid = computed(() => {
       if (d === 0) {
         const m = cellDate.getMonth()
         if (m !== lastMonth) {
-          monthLabel = cellDate.toLocaleDateString('id-ID', { month: 'short' })
+          monthLabel = formatDateJakarta(cellDate, { month: 'short' })
           lastMonth = m
         }
       }
@@ -80,7 +81,7 @@ const weeksGrid = computed(() => {
           }
         : getHabitCellVisual(props.habit, val)
 
-      const readableDate = cellDate.toLocaleDateString('id-ID', {
+      const readableDate = formatDateJakarta(cellDate, {
         weekday: 'short',
         day: 'numeric',
         month: 'short',

@@ -1,10 +1,11 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
-import { CalendarDays } from 'lucide-vue-next'
+import { Calendar } from '@iconoir/vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
 import { getTodayDateStr } from '@/stores/habitStore'
+import { formatDateJakarta } from '@/utils/dateUtils'
 
 const props = defineProps({
   habits: {
@@ -67,7 +68,7 @@ const overallWeeks = computed(() => {
       if (d === 0) {
         const m = cellDate.getMonth()
         if (m !== lastMonth) {
-          monthLabel = cellDate.toLocaleDateString('id-ID', { month: 'short' })
+          monthLabel = formatDateJakarta(cellDate, { month: 'short' })
           lastMonth = m
         }
       }
@@ -137,7 +138,7 @@ const overallWeeks = computed(() => {
         statusDesc = 'Tergoda sedikit pada Bad Habit'
       }
 
-      const readableDate = cellDate.toLocaleDateString('id-ID', {
+      const readableDate = formatDateJakarta(cellDate, {
         weekday: 'short',
         day: 'numeric',
         month: 'short',
@@ -174,7 +175,7 @@ onMounted(() => {
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
       <div class="flex items-center gap-2">
         <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-          <CalendarDays class="w-4 h-4" />
+          <Calendar class="w-4 h-4" />
         </div>
         <div>
           <BaseHeading as="h3" size="sm" weight="semibold">

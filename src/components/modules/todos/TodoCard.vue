@@ -1,15 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import {
-  Check,
-  CheckSquare,
-  ChevronDown,
-  ChevronUp,
-  Pencil,
-  Trash2,
-  Plus,
-  CloudUpload,
-} from 'lucide-vue-next'
+import { Check, CheckSquare, NavArrowDown, NavArrowUp, EditPencil, Trash, Plus, CloudUpload } from '@iconoir/vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
@@ -138,8 +129,8 @@ const progressPercent = computed(() => {
               <span v-else class="flex items-center gap-0.5">
                 <Plus class="w-2.5 h-2.5" /> Sub-checklist
               </span>
-              <ChevronUp v-if="expanded" class="w-2.5 h-2.5" />
-              <ChevronDown v-else class="w-2.5 h-2.5" />
+              <NavArrowUp v-if="expanded" class="w-2.5 h-2.5" />
+              <NavArrowDown v-else class="w-2.5 h-2.5" />
             </button>
 
             <!-- Offline Pending Sync Pill -->
@@ -185,7 +176,7 @@ const progressPercent = computed(() => {
           class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
           title="Edit tugas"
         >
-          <Pencil class="w-3.5 h-3.5" />
+          <EditPencil class="w-3.5 h-3.5" />
         </button>
 
         <button
@@ -194,7 +185,7 @@ const progressPercent = computed(() => {
           class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
           title="Hapus tugas"
         >
-          <Trash2 class="w-3.5 h-3.5" />
+          <Trash class="w-3.5 h-3.5" />
         </button>
       </div>
     </div>

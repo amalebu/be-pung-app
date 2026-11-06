@@ -1,5 +1,5 @@
 <script setup>
-import { Loader2 } from 'lucide-vue-next'
+import { SystemRestart } from '@iconoir/vue'
 
 defineProps({
   type: {
@@ -53,7 +53,7 @@ defineProps({
         : '',
     ]"
   >
-    <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
+    <SystemRestart v-if="loading" class="w-4 h-4 animate-spin" />
     <slot />
   </button>
 </template>

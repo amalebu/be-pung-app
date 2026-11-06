@@ -3,16 +3,27 @@ import { ref, onMounted } from 'vue'
 const isDark = ref(false)
 
 export function useTheme() {
+  function updateThemeColorMeta(dark) {
+    const color = dark ? '#1a1c1e' : '#f9f9fc'
+    const metas = document.querySelectorAll('meta[name="theme-color"]')
+    metas.forEach((meta) => {
+      meta.setAttribute('content', color)
+    })
+  }
+
   function applyTheme(dark) {
     isDark.value = dark
     const root = document.documentElement
     if (dark) {
       root.classList.add('dark')
+      root.setAttribute('data-theme', 'dark')
       localStorage.setItem('personal_app_theme', 'dark')
     } else {
       root.classList.remove('dark')
+      root.setAttribute('data-theme', 'light')
       localStorage.setItem('personal_app_theme', 'light')
     }
+    updateThemeColorMeta(dark)
   }
 
   function toggleTheme() {

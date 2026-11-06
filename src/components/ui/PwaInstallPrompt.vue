@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { Download, X, Share2, PlusSquare } from 'lucide-vue-next'
+import { Download, Xmark, ShareAndroid, PlusSquare } from '@iconoir/vue'
 import { usePwa } from '@/composables/usePwa'
 import PrimaryButton from '@/components/ui/PrimaryButton.vue'
 import BaseText from '@/components/ui/BaseText.vue'
@@ -53,7 +53,7 @@ async function handleInstall() {
         class="text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 p-1 rounded-md transition-colors cursor-pointer"
         title="Tutup ajakan"
       >
-        <X class="w-4 h-4" />
+        <Xmark class="w-4 h-4" />
       </button>
     </div>
 
@@ -83,7 +83,7 @@ async function handleInstall() {
       class="mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800 text-xs space-y-1.5 text-slate-600 dark:text-zinc-300"
     >
       <p class="font-medium flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400">
-        <Share2 class="w-3.5 h-3.5" /> 1. Ketuk tombol 'Share' di browser Safari.
+        <ShareAndroid class="w-3.5 h-3.5" /> 1. Ketuk tombol 'Share' di browser Safari.
       </p>
       <p class="font-medium flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400">
         <PlusSquare class="w-3.5 h-3.5" /> 2. Pilih 'Add to Home Screen' (Tambah ke Layar Utama).

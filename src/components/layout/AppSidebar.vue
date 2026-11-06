@@ -1,51 +1,17 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import {
-  LayoutDashboard,
-  Wallet,
-  Sparkles,
-  CheckSquare,
-  PanelLeftClose,
-  PanelLeftOpen,
-  LogOut,
-  ShieldCheck,
-} from 'lucide-vue-next'
+import { SidebarCollapse, SidebarExpand, LogOut } from '@iconoir/vue'
 import NavLink from './NavLink.vue'
-import BaseHeading from '@/components/ui/BaseHeading.vue'
+import ThemeToggle from './ThemeToggle.vue'
+import DefaultAvatar from '@/components/ui/DefaultAvatar.vue'
 import BaseText from '@/components/ui/BaseText.vue'
 import { useAuthStore } from '@/stores/authStore'
+import { mainNavItems } from '@/config/navigation'
 
 const collapsed = ref(false)
 const router = useRouter()
 const authStore = useAuthStore()
-
-const navItems = [
-  {
-    name: 'Dashboard',
-    path: '/dashboard',
-    icon: LayoutDashboard,
-    badge: null,
-  },
-  {
-    name: 'Finance Tracker',
-    path: '/dashboard',
-    icon: Wallet,
-    badge: 'Segera',
-  },
-  {
-    name: 'Habit Tracker',
-    path: '/habits',
-    icon: Sparkles,
-    badge: null,
-  },
-  {
-    name: 'To-Do List',
-    path: '/todos',
-    icon: CheckSquare,
-    badge: null,
-  },
-]
 
 async function handleLogout() {
   await authStore.logout()
@@ -55,29 +21,11 @@ async function handleLogout() {
 
 <template>
   <aside
-    class="hidden md:flex flex-col border-r border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-all duration-200 shrink-0"
+    class="hidden md:flex flex-col sticky top-0 h-screen overflow-hidden pt-14 border-r border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-all duration-200 shrink-0 z-30"
     :class="collapsed ? 'w-16' : 'w-60'"
   >
-    <!-- Brand Header -->
-    <div class="h-14 flex items-center justify-between px-4 border-b border-slate-200 dark:border-zinc-800">
-      <div class="flex items-center gap-2.5 overflow-hidden">
-        <div class="w-8 h-8 rounded-md bg-pod-sage flex items-center justify-center text-white font-semibold text-sm shrink-0 shadow-floating">
-          P
-        </div>
-        <div v-if="!collapsed" class="truncate">
-          <BaseHeading as="p" size="sm" weight="semibold" class="leading-none">
-            PersonalApp
-          </BaseHeading>
-          <BaseText size="xs" variant="muted" class="mt-0.5 flex items-center gap-1">
-            <ShieldCheck class="w-3 h-3 text-emerald-500" />
-            Modular SQLite
-          </BaseText>
-        </div>
-      </div>
-    </div>
-
-    <!-- Navigation Links -->
-    <nav class="flex-1 p-3 space-y-1">
+    <!-- Navigation Links (Scrollable area) -->
+    <nav class="flex-1 overflow-y-auto min-h-0 p-3 space-y-1">
       <BaseText
         v-if="!collapsed"
         size="xs"
@@ -88,7 +36,7 @@ async function handleLogout() {
       </BaseText>
 
       <NavLink
-        v-for="item in navItems"
+        v-for="item in mainNavItems"
         :key="item.name"
         :to="item.path"
         :name="item.name"
@@ -98,16 +46,32 @@ async function handleLogout() {
       />
     </nav>
 
-    <!-- Bottom Controls -->
-    <div class="p-3 border-t border-slate-200 dark:border-zinc-800 space-y-1">
+    <!-- Bottom Controls (Fixed at bottom) -->
+    <div class="shrink-0 mt-auto p-3 border-t border-slate-200 dark:border-zinc-800 space-y-1 bg-white dark:bg-zinc-900">
+      <router-link
+        to="/profile"
+        class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/60 hover:text-slate-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
+        :class="{ 'justify-center': collapsed }"
+        :title="collapsed ? 'Profil Saya' : ''"
+      >
+        <DefaultAvatar
+          :avatar-url="authStore.user?.avatar"
+          :name="authStore.user?.name || 'Pengguna'"
+          size="xs"
+        />
+        <span v-if="!collapsed" class="truncate font-semibold">Profil Saya</span>
+      </router-link>
+
+      <ThemeToggle :show-side-nav="!collapsed" />
+
       <button
         type="button"
         @click="collapsed = !collapsed"
         class="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800/60 hover:text-slate-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
         :title="collapsed ? 'Perluas Sidebar' : 'Lipat Sidebar'"
       >
-        <PanelLeftOpen v-if="collapsed" class="w-4 h-4 shrink-0" />
-        <PanelLeftClose v-else class="w-4 h-4 shrink-0" />
+        <SidebarExpand v-if="collapsed" class="w-4 h-4 shrink-0" />
+        <SidebarCollapse v-else class="w-4 h-4 shrink-0" />
         <span v-if="!collapsed">Lipat Sidebar</span>
       </button>
 

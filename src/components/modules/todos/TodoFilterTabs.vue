@@ -1,5 +1,5 @@
 <script setup>
-import { Search, X, Flag } from 'lucide-vue-next'
+import { Search, Xmark, TriangleFlag } from '@iconoir/vue'
 
 defineProps({
   activeFilter: {
@@ -57,14 +57,14 @@ const priorities = [
           @click="emit('update:search', '')"
           class="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 cursor-pointer"
         >
-          <X class="w-3.5 h-3.5" />
+          <Xmark class="w-3.5 h-3.5" />
         </button>
       </div>
 
       <!-- Priority Quick Filter -->
       <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 sm:pb-0">
         <span class="text-xs text-slate-400 dark:text-zinc-500 font-medium mr-1 flex items-center gap-1 shrink-0">
-          <Flag class="w-3 h-3" /> Prioritas:
+          <TriangleFlag class="w-3 h-3" /> Prioritas:
         </span>
         <button
           v-for="p in priorities"

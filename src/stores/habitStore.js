@@ -3,14 +3,10 @@ import { ref } from 'vue'
 import { habitService } from '@/services/habitService'
 import { localDb } from '@/services/localDb'
 import { useNetworkStore } from '@/stores/networkStore'
+import { getJakartaTodayStr } from '@/utils/dateUtils'
 
 export function getTodayDateStr(offsetDays = 0) {
-  const d = new Date()
-  d.setDate(d.getDate() + offsetDays)
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
+  return getJakartaTodayStr(offsetDays)
 }
 
 function getCurrentUserId() {
@@ -190,6 +186,8 @@ export const useHabitStore = defineStore('habit', () => {
   const networkStore = useNetworkStore()
 
   const habits = ref([])
+  // Seluruh habit tanpa filter tipe/pencarian (dipakai Dashboard)
+  const allHabits = ref([])
   const summary = ref({
     total: 0,
     good_count: 0,
@@ -264,6 +262,7 @@ export const useHabitStore = defineStore('habit', () => {
     const cached = (await localDb.getCachedHabits(userId)).map(
       recalculateHabitLocalState
     )
+    allHabits.value = cached
     summary.value = computeLocalSummary(cached)
 
     const q = searchQuery.value.trim().toLowerCase()
@@ -620,6 +619,7 @@ export const useHabitStore = defineStore('habit', () => {
 
   return {
     habits,
+    allHabits,
     summary,
     activeTypeFilter,
     searchQuery,

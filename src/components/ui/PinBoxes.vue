@@ -63,34 +63,52 @@ onBeforeUnmount(clearReveal)
   <div
     role="img"
     :aria-label="`${value.length} dari ${length} digit PIN terisi`"
-    class="flex items-center justify-center gap-2 sm:gap-3 py-3"
+    class="mb-4 mt-8 flex items-center justify-center gap-2.5 w-full max-w-[320px] mx-auto"
     :class="error ? 'animate-pin-shake' : ''"
   >
-    <span
+    <div
       v-for="idx in length"
       :key="idx"
-      class="w-11 h-11 sm:w-12 sm:h-12 rounded-md flex items-center justify-center text-lg font-semibold tabular-nums transition-all duration-200"
+      class="w-11 h-14 rounded-2xl flex flex-col items-center justify-center transition-all duration-200 select-none"
       :class="[
-        loading ? 'animate-pulse' : '',
         error
-          ? 'bg-error-container dark:bg-rose-950/60 text-error dark:text-rose-300'
+          ? 'bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-500'
           : idx <= value.length
-            ? 'bg-pod-sage text-white shadow-floating scale-105'
+            ? 'bg-white dark:bg-zinc-800 shadow-[inset_0_2px_4px_rgba(0,0,0,0.06),inset_0_-1px_2px_rgba(255,255,255,0.7)] dark:shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-zinc-700/60'
             : idx === value.length + 1 && !loading
-              ? 'bg-white dark:bg-zinc-800 ring-2 ring-pod-lime shadow-bio-glow'
-              : 'bg-pod-well dark:bg-zinc-800 shadow-well',
+              ? 'bg-white dark:bg-zinc-900 border-2 border-[#144229] dark:border-[#a1d2af] shadow-[0_2px_12px_rgba(20,66,41,0.12)]'
+              : 'bg-[#f3f3f6] dark:bg-zinc-800/50 border border-[#e2e2e5] dark:border-zinc-700/40 shadow-[inset_0_2px_4px_rgba(0,0,0,0.03)]',
       ]"
     >
+      <!-- STATE 1: Terisi (Filled) -->
       <template v-if="idx <= value.length">
-        <span v-if="!error && !loading && revealIndex === idx - 1">
+        <!-- Peek Reveal Digit Sementara -->
+        <span
+          v-if="!error && !loading && revealIndex === idx - 1"
+          class="text-xl font-bold text-slate-900 dark:text-zinc-100 tabular-nums leading-none"
+        >
           {{ value[idx - 1] }}
         </span>
+        <!-- Titik Bulat Berisi -->
         <span
           v-else
-          class="w-2.5 h-2.5 rounded-full"
-          :class="error ? 'bg-error dark:bg-rose-300' : 'bg-pod-lime'"
+          class="w-3.5 h-3.5 rounded-full shadow-xs"
+          :class="error ? 'bg-rose-600 dark:bg-rose-400' : 'bg-[#144229] dark:bg-[#a1d2af]'"
         />
       </template>
-    </span>
+
+      <!-- STATE 2: Sedang Aktif / Kursor Berkedip (Focused) -->
+      <template v-else-if="idx === value.length + 1 && !loading">
+        <div
+          class="w-0.5 h-5 rounded-full animate-pulse"
+          :class="error ? 'bg-rose-600 dark:bg-rose-400' : 'bg-[#144229] dark:bg-[#a1d2af]'"
+        />
+      </template>
+
+      <!-- STATE 3: Belum Terisi (Blank) -->
+      <template v-else>
+        <span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-zinc-600" />
+      </template>
+    </div>
   </div>
 </template>

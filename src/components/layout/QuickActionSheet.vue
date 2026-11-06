@@ -1,11 +1,5 @@
 <script setup>
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  CheckSquare,
-  Sparkles,
-  PenLine,
-} from 'lucide-vue-next'
+import { ArrowDownRight, ArrowUpRight, GraphUp, CheckSquare, Spark, EditPencil } from '@iconoir/vue'
 import BottomSheet from '@/components/ui/BottomSheet.vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
@@ -20,6 +14,13 @@ defineProps({
 const emit = defineEmits(['close', 'select'])
 
 const actions = [
+  {
+    id: 'investment',
+    title: 'Beli Saham (Investment)',
+    desc: 'Catat pembelian lot saham BEI & rata-rata harga',
+    icon: GraphUp,
+    colorClass: 'bg-[#d3e4d8] text-[#144229] dark:bg-[#2d5a3f] dark:text-[#a1d2af]',
+  },
   {
     id: 'expense',
     title: 'Catat Pengeluaran',
@@ -45,14 +46,14 @@ const actions = [
     id: 'habit',
     title: 'Ceklis Habit Hari Ini',
     desc: 'Tandai progres rutinitas dan bangun streak',
-    icon: Sparkles,
+    icon: Spark,
     colorClass: 'bg-amber-100 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400',
   },
   {
     id: 'journal',
     title: 'Tulis Jurnal Harian',
     desc: 'Refleksi hari ini, catatan ide, atau mood log',
-    icon: PenLine,
+    icon: EditPencil,
     colorClass: 'bg-sky-100 text-sky-600 dark:bg-sky-950/50 dark:text-sky-400',
   },
 ]

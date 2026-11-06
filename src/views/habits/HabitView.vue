@@ -1,12 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
-import {
-  Plus,
-  Sparkles,
-  ShieldAlert,
-  Search,
-  X,
-} from 'lucide-vue-next'
+import { Plus, Spark, ShieldAlert, Search, Xmark } from '@iconoir/vue'
 import AppShell from '@/components/layout/AppShell.vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
@@ -146,7 +140,7 @@ onMounted(() => {
             @click="handleSearchInput('')"
             class="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 cursor-pointer"
           >
-            <X class="w-3.5 h-3.5" />
+            <Xmark class="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -174,7 +168,7 @@ onMounted(() => {
         class="text-center"
       >
         <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-3">
-          <Sparkles class="w-6 h-6" />
+          <Spark class="w-6 h-6" />
         </div>
         <BaseHeading as="h3" size="md" weight="semibold">
           Belum Ada Habit pada Kategori Ini

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getJakartaTodayStr, JAKARTA_TIMEZONE } from '@/utils/dateUtils'
 
 function getApiBaseUrl() {
   const envUrl = import.meta.env.VITE_API_BASE_URL
@@ -25,13 +26,9 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
 
-    // Attach client's current date (YYYY-MM-DD) and timezone
-    const now = new Date()
-    const y = now.getFullYear()
-    const m = String(now.getMonth() + 1).padStart(2, '0')
-    const d = String(now.getDate()).padStart(2, '0')
-    config.headers['X-Client-Date'] = `${y}-${m}-${d}`
-    config.headers['X-Timezone'] = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jakarta'
+    // Attach client's current date (YYYY-MM-DD) and timezone (Asia/Jakarta, GMT+7)
+    config.headers['X-Client-Date'] = getJakartaTodayStr()
+    config.headers['X-Timezone'] = JAKARTA_TIMEZONE
 
     return config
   },

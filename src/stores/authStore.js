@@ -50,9 +50,20 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function lockApp() {
+  async function lockApp() {
     if (isAuthenticated.value && user.value?.has_pin) {
       setPinLocked(true)
+      try {
+        const { default: router } = await import('@/router')
+        if (router.currentRoute.value.name !== 'verify-pin') {
+          router.push({
+            name: 'verify-pin',
+            query: { redirect: router.currentRoute.value.fullPath },
+          })
+        }
+      } catch {
+        // Fallback handled by navigation guard
+      }
     }
   }
 
@@ -264,7 +275,7 @@ export const useAuthStore = defineStore('auth', () => {
       if (!me) {
         throw new Error('Token tidak valid')
       }
-      setPinLocked(Boolean(me.has_pin))
+      setPinLocked(false)
       recordActivity()
       return { success: true, data: me }
     } catch {
@@ -299,6 +310,71 @@ export const useAuthStore = defineStore('auth', () => {
         return null
       }
       return user.value
+    }
+  }
+
+  async function updateProfile(payload) {
+    loading.value = true
+    clearErrors()
+    try {
+      const res = await authService.updateProfile(payload)
+      user.value = res.data
+      localStorage.setItem('personal_app_user', JSON.stringify(res.data))
+      return { success: true, data: res.data }
+    } catch (err) {
+      const responseData = err.response?.data
+      errorMessage.value =
+        responseData?.message || 'Gagal memperbarui profil pengguna.'
+      validationErrors.value = responseData?.errors || {}
+      return { success: false, error: responseData }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function linkGoogleAccount(payload) {
+    loading.value = true
+    clearErrors()
+    try {
+      const res = await authService.linkGoogle(payload)
+      user.value = res.data
+      localStorage.setItem('personal_app_user', JSON.stringify(res.data))
+      return { success: true, data: res.data }
+    } catch (err) {
+      const responseData = err.response?.data
+      errorMessage.value =
+        responseData?.errors?.google?.[0] ||
+        responseData?.message ||
+        'Gagal menautkan akun Google.'
+      validationErrors.value = responseData?.errors || {}
+      return { success: false, error: responseData }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function linkPhoneAccount(payload) {
+    loading.value = true
+    clearErrors()
+    try {
+      const res = await authService.linkPhone(payload)
+      user.value = res.data
+      localStorage.setItem('personal_app_user', JSON.stringify(res.data))
+      if (payload.pin) {
+        await saveLocalPinHash(payload.pin, res.data.id)
+      }
+      return { success: true, data: res.data }
+    } catch (err) {
+      const responseData = err.response?.data
+      errorMessage.value =
+        responseData?.errors?.phone?.[0] ||
+        responseData?.errors?.pin?.[0] ||
+        responseData?.message ||
+        'Gagal menautkan nomor ponsel dan PIN.'
+      validationErrors.value = responseData?.errors || {}
+      return { success: false, error: responseData }
+    } finally {
+      loading.value = false
     }
   }
 
@@ -337,6 +413,9 @@ export const useAuthStore = defineStore('auth', () => {
     loginWithGoogle,
     loginWithToken,
     fetchMe,
+    updateProfile,
+    linkGoogleAccount,
+    linkPhoneAccount,
     logout,
   }
 })

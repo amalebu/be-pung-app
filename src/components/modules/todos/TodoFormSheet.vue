@@ -1,19 +1,12 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
-import {
-  Flag,
-  Calendar,
-  Clock,
-  Plus,
-  Trash2,
-  Check,
-  Sparkles,
-} from 'lucide-vue-next'
+import { TriangleFlag, Calendar, Clock, Plus, Trash, Check, Spark } from '@iconoir/vue'
 import BottomSheet from '@/components/ui/BottomSheet.vue'
 import PrimaryButton from '@/components/ui/PrimaryButton.vue'
 import SecondaryButton from '@/components/ui/SecondaryButton.vue'
 import BaseText from '@/components/ui/BaseText.vue'
 import BaseAlert from '@/components/ui/BaseAlert.vue'
+import { getJakartaTodayStr } from '@/utils/dateUtils'
 
 const props = defineProps({
   show: {
@@ -46,27 +39,20 @@ const newSubItemText = ref('')
 
 const isEditMode = computed(() => Boolean(props.editingTodo?.id))
 
-function formatLocalDate(dateObj) {
-  const y = dateObj.getFullYear()
-  const m = String(dateObj.getMonth() + 1).padStart(2, '0')
-  const d = String(dateObj.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
-}
-
 function getPresetDate(type) {
-  const now = new Date()
   if (type === 'today') {
-    return formatLocalDate(now)
+    return getJakartaTodayStr(0)
   }
   if (type === 'tomorrow') {
-    now.setDate(now.getDate() + 1)
-    return formatLocalDate(now)
+    return getJakartaTodayStr(1)
   }
   if (type === 'weekend') {
+    const todayStr = getJakartaTodayStr(0)
+    const [y, m, d] = todayStr.split('-').map(Number)
+    const now = new Date(y, m - 1, d)
     const day = now.getDay() // 0 Sun .. 6 Sat
     const daysUntilSaturday = day === 6 ? 7 : (6 - day)
-    now.setDate(now.getDate() + daysUntilSaturday)
-    return formatLocalDate(now)
+    return getJakartaTodayStr(daysUntilSaturday)
   }
   return ''
 }
@@ -210,7 +196,7 @@ const priorityOptions = [
       <!-- Prioritas -->
       <div>
         <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
-          <Flag class="w-3.5 h-3.5 text-indigo-500" />
+          <TriangleFlag class="w-3.5 h-3.5 text-indigo-500" />
           Prioritas Tugas
         </label>
         <div class="grid grid-cols-3 gap-2">
@@ -315,7 +301,7 @@ const priorityOptions = [
       <div class="space-y-2 pt-1 border-t border-slate-100 dark:border-zinc-800">
         <div class="flex items-center justify-between">
           <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-zinc-300">
-            <Sparkles class="w-3.5 h-3.5 text-indigo-500" />
+            <Spark class="w-3.5 h-3.5 text-indigo-500" />
             Sub-Checklist
           </label>
           <span class="text-[11px] text-slate-400 dark:text-zinc-500 tabular-nums">
@@ -355,7 +341,7 @@ const priorityOptions = [
               @click="removeDraftSubtask(idx)"
               class="w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-500 cursor-pointer shrink-0"
             >
-              <Trash2 class="w-3.5 h-3.5" />
+              <Trash class="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

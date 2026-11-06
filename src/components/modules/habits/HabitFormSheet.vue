@@ -1,17 +1,6 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
-import {
-  Sparkles,
-  ShieldAlert,
-  Droplets,
-  Dumbbell,
-  BookOpen,
-  Coffee,
-  Ban,
-  Moon,
-  Flame,
-  Heart,
-} from 'lucide-vue-next'
+import { Spark, ShieldAlert, Droplet, Gym, OpenBook, CoffeeCup, Prohibition, HalfMoon, FireFlame, Heart } from '@iconoir/vue'
 import BottomSheet from '@/components/ui/BottomSheet.vue'
 import PrimaryButton from '@/components/ui/PrimaryButton.vue'
 import SecondaryButton from '@/components/ui/SecondaryButton.vue'
@@ -105,13 +94,13 @@ const starterTemplates = {
 }
 
 const iconOptions = [
-  { id: 'droplets', label: 'Air', comp: Droplets },
-  { id: 'dumbbell', label: 'Olahraga', comp: Dumbbell },
-  { id: 'book', label: 'Buku', comp: BookOpen },
-  { id: 'coffee', label: 'Kopi/Boba', comp: Coffee },
-  { id: 'ban', label: 'Stop', comp: Ban },
-  { id: 'moon', label: 'Tidur', comp: Moon },
-  { id: 'flame', label: 'Semangat', comp: Flame },
+  { id: 'droplets', label: 'Air', comp: Droplet },
+  { id: 'dumbbell', label: 'Olahraga', comp: Gym },
+  { id: 'book', label: 'Buku', comp: OpenBook },
+  { id: 'coffee', label: 'Kopi/Boba', comp: CoffeeCup },
+  { id: 'ban', label: 'Stop', comp: Prohibition },
+  { id: 'moon', label: 'Tidur', comp: HalfMoon },
+  { id: 'flame', label: 'Semangat', comp: FireFlame },
   { id: 'heart', label: 'Kesehatan', comp: Heart },
 ]
 
@@ -205,7 +194,7 @@ function handleSubmit() {
                 : 'border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400'
             "
           >
-            <Sparkles class="w-4 h-4 text-emerald-500 shrink-0" />
+            <Spark class="w-4 h-4 text-emerald-500 shrink-0" />
             <div>
               <p class="text-xs font-bold">New Good Habit</p>
               <p class="text-[10px] opacity-80">Kalender Hijau Bertingkat</p>

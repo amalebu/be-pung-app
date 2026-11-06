@@ -3,20 +3,14 @@ import { ref } from 'vue'
 import { todoService } from '@/services/todoService'
 import { localDb } from '@/services/localDb'
 import { useNetworkStore } from '@/stores/networkStore'
+import { getJakartaTodayStr, getJakartaNowTimeStr } from '@/utils/dateUtils'
 
 function getTodayDateStr() {
-  const now = new Date()
-  const y = now.getFullYear()
-  const m = String(now.getMonth() + 1).padStart(2, '0')
-  const d = String(now.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
+  return getJakartaTodayStr()
 }
 
 function getNowTimeStr() {
-  const now = new Date()
-  const h = String(now.getHours()).padStart(2, '0')
-  const min = String(now.getMinutes()).padStart(2, '0')
-  return `${h}:${min}`
+  return getJakartaNowTimeStr()
 }
 
 function getCurrentUserId() {
@@ -162,6 +156,8 @@ export const useTodoStore = defineStore('todo', () => {
   const networkStore = useNetworkStore()
 
   const todos = ref([])
+  // Seluruh tugas tanpa filter (dipakai Dashboard agar tidak terpengaruh tab filter halaman To-Do)
+  const allTodos = ref([])
   const counts = ref({
     all: 0,
     active: 0,
@@ -216,6 +212,7 @@ export const useTodoStore = defineStore('todo', () => {
   async function refreshFromLocalCache() {
     const userId = getCurrentUserId()
     const allCached = await localDb.getCachedTodos(userId)
+    allTodos.value = allCached
     counts.value = computeLocalCounts(allCached)
     todos.value = filterAndSortLocalTodos(allCached, {
       filter: activeFilter.value,
@@ -676,6 +673,7 @@ export const useTodoStore = defineStore('todo', () => {
 
   return {
     todos,
+    allTodos,
     counts,
     activeFilter,
     activePriority,

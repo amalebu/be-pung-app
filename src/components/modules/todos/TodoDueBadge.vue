@@ -1,7 +1,8 @@
 <script setup>
 import { computed } from 'vue'
-import { Calendar, Clock, AlertCircle } from 'lucide-vue-next'
+import { Calendar, Clock, WarningCircle } from '@iconoir/vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
+import { getJakartaTodayStr, formatDateJakarta } from '@/utils/dateUtils'
 
 const props = defineProps({
   dueDate: {
@@ -27,12 +28,7 @@ const props = defineProps({
 })
 
 function getLocalDateStr(offsetDays = 0) {
-  const d = new Date()
-  d.setDate(d.getDate() + offsetDays)
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  return getJakartaTodayStr(offsetDays)
 }
 
 const formattedDate = computed(() => {
@@ -52,10 +48,10 @@ const formattedDate = computed(() => {
   } else {
     const [y, m, d] = props.dueDate.split('-').map(Number)
     const dateObj = new Date(y, m - 1, d)
-    datePart = dateObj.toLocaleDateString('id-ID', {
+    datePart = formatDateJakarta(dateObj, {
       day: 'numeric',
       month: 'short',
-      year: y !== new Date().getFullYear() ? 'numeric' : undefined,
+      year: y !== Number(getJakartaTodayStr().slice(0, 4)) ? 'numeric' : undefined,
     })
   }
 
@@ -81,7 +77,7 @@ const badgeVariant = computed(() => {
     :size="size"
     class="tabular-nums"
   >
-    <AlertCircle v-if="isOverdue && !isCompleted" class="w-2.5 h-2.5" />
+    <WarningCircle v-if="isOverdue && !isCompleted" class="w-2.5 h-2.5" />
     <Clock v-else-if="dueTime" class="w-2.5 h-2.5" />
     <Calendar v-else class="w-2.5 h-2.5" />
     <span>{{ isOverdue && !isCompleted ? `Terlambat • ${formattedDate}` : formattedDate }}</span>

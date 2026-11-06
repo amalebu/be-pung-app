@@ -1,27 +1,20 @@
 <script setup>
 import { computed } from 'vue'
 import {
-  Droplets,
-  Dumbbell,
-  BookOpen,
-  Coffee,
-  Ban,
-  Moon,
-  Flame,
-  Heart,
-  Sparkles,
+  FireFlame,
   Plus,
   Minus,
-  Pencil,
-  Trash2,
+  EditPencil,
+  Trash,
   CloudUpload,
   Calendar,
-} from 'lucide-vue-next'
+} from '@iconoir/vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 import HabitHeatmapGrid from './HabitHeatmapGrid.vue'
+import { getHabitIcon } from '@/utils/habitIcons'
 import { getTodayDateStr } from '@/stores/habitStore'
 
 const props = defineProps({
@@ -39,19 +32,7 @@ const emit = defineEmits([
   'delete',
 ])
 
-const iconMap = {
-  droplets: Droplets,
-  dumbbell: Dumbbell,
-  book: BookOpen,
-  coffee: Coffee,
-  ban: Ban,
-  moon: Moon,
-  flame: Flame,
-  heart: Heart,
-  sparkles: Sparkles,
-}
-
-const iconComponent = computed(() => iconMap[props.habit.icon] || Sparkles)
+const iconComponent = computed(() => getHabitIcon(props.habit.icon))
 
 const isGood = computed(() => props.habit.type === 'good')
 const todayVal = computed(() => Number(props.habit.today_value || 0))
@@ -75,7 +56,7 @@ const progressBarColor = computed(() => {
     if (progressPercent.value >= 60) return 'bg-emerald-400'
     return 'bg-emerald-300'
   }
-  if (todayVal.value <= 0) return 'bg-slate-200 dark:bg-zinc-700'
+  if (todayVal.value <= 0) return 'bg-slate-200 dark:zinc-700'
   const limit = targetVal.value > 0 ? targetVal.value : stepVal.value
   if (todayVal.value <= limit) return 'bg-rose-300 dark:bg-rose-400'
   return 'bg-rose-600 dark:bg-rose-500'
@@ -113,7 +94,7 @@ function handleSelectDate(dateStr) {
             </BaseBadge>
 
             <BaseBadge variant="amber" size="xs" class="tabular-nums">
-              <Flame class="w-2.5 h-2.5 fill-current" />
+              <FireFlame class="w-2.5 h-2.5 fill-current" />
               <span>{{ habit.current_streak || 0 }} hari</span>
             </BaseBadge>
 
@@ -154,7 +135,7 @@ function handleSelectDate(dateStr) {
           class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
           title="Edit pengaturan habit"
         >
-          <Pencil class="w-3.5 h-3.5" />
+          <EditPencil class="w-3.5 h-3.5" />
         </button>
 
         <button
@@ -163,7 +144,7 @@ function handleSelectDate(dateStr) {
           class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
           title="Hapus habit"
         >
-          <Trash2 class="w-3.5 h-3.5" />
+          <Trash class="w-3.5 h-3.5" />
         </button>
       </div>
     </div>
@@ -195,10 +176,10 @@ function handleSelectDate(dateStr) {
           >
             <template v-if="isGood">
               {{ todayVal }} / {{ targetVal }} {{ habit.unit }}
-              <span v-if="todayVal >= targetVal" class="text-xs font-semibold ml-1">✓ Target Penuh!</span>
+              <span v-if="todayVal >= targetVal" class="text-xs font-semibold ml-1">🎯 Target Penuh!</span>
             </template>
             <template v-else>
-              <span v-if="todayVal === 0">0 {{ habit.unit }} (Bersih • Putih)</span>
+              <span v-if="todayVal === 0">0 {{ habit.unit }} (Bersih / Bebas)</span>
               <span v-else>{{ todayVal }} {{ habit.unit }} (Batas maks: {{ targetVal }} {{ habit.unit }})</span>
             </template>
           </span>

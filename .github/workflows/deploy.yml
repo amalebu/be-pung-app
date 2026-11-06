@@ -37,6 +37,7 @@ jobs:
 
       - name: Build with Vite
         env:
+          VITE_BASE_PATH: /be-pung-app/
           VITE_API_BASE_URL: https://9knv83ss-8000.asse.devtunnels.ms/api/v1/personal-app
           VITE_BACKEND_URL: https://9knv83ss-8000.asse.devtunnels.ms
           VITE_PUBLIC_URL: https://amalebu.github.io/be-pung-app

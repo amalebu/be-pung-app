@@ -1,15 +1,18 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { ArrowRight, SystemRestart } from '@iconoir/vue'
 import AuthShell from '@/components/layout/AuthShell.vue'
 import AuthMobileHeader from '@/components/layout/AuthMobileHeader.vue'
+import ThemeToggle from '@/components/layout/ThemeToggle.vue'
 import PhoneInput from '@/components/ui/PhoneInput.vue'
 import PinPadView from '@/components/ui/PinPadView.vue'
-import PrimaryButton from '@/components/ui/PrimaryButton.vue'
 import GoogleLoginButton from '@/components/ui/GoogleLoginButton.vue'
 import BaseAlert from '@/components/ui/BaseAlert.vue'
 import { authService } from '@/services/authService'
 import { useAuthStore } from '@/stores/authStore'
+import { sanitizePhone, formatPhoneDisplay } from '@/utils/phoneUtils'
+import { usePhoneFormatter } from '@/composables/usePhoneFormatter'
 
 const router = useRouter()
 const route = useRoute()
@@ -17,14 +20,14 @@ const authStore = useAuthStore()
 
 // 'phone' | 'enter-pin' | 'create-pin' | 'confirm-pin'
 const step = ref('phone')
-const phone = ref('')
+const { phone, onInput } = usePhoneFormatter('')
 const firstPin = ref('')
 const localError = ref('')
 const pinPadRef = ref(null)
 
 const isPhoneValid = computed(() => {
-  const clean = phone.value.replace(/[^0-9]/g, '')
-  return clean.length >= 8 && clean.length <= 13 && clean.startsWith('8')
+  const clean = sanitizePhone(phone.value)
+  return /^628[1-9][0-9]{6,11}$/.test(clean)
 })
 
 const headerTitle = computed(() => {
@@ -41,11 +44,12 @@ const pinScreenTitle = computed(() => {
 })
 
 const pinScreenSubtitle = computed(() => {
+  const display = formatPhoneDisplay(phone.value)
   if (step.value === 'enter-pin') {
-    return `Masukkan PIN keamanan untuk nomor +62 ${phone.value}`
+    return `Masukkan PIN keamanan untuk nomor ${display}`
   }
   if (step.value === 'create-pin') {
-    return `Nomor +62 ${phone.value} baru pertama kali masuk. Buat 6 digit PIN Anda.`
+    return `Nomor ${display} baru pertama kali masuk. Buat 6 digit PIN Anda.`
   }
   return 'Masukkan kembali 6 digit PIN yang baru saja Anda buat.'
 })
@@ -77,7 +81,8 @@ async function handleCheckPhone() {
   if (!isPhoneValid.value) return
   clearAllErrors()
 
-  const res = await authStore.checkPhone(phone.value)
+  const cleanPhone = sanitizePhone(phone.value)
+  const res = await authStore.checkPhone(cleanPhone)
   if (res.success) {
     firstPin.value = ''
     if (res.data.has_pin) {
@@ -90,11 +95,12 @@ async function handleCheckPhone() {
 
 async function handlePinCompleted(enteredPin) {
   clearAllErrors()
+  const cleanPhone = sanitizePhone(phone.value)
 
   // 1. Jika user lama memasukkan PIN
   if (step.value === 'enter-pin') {
     const res = await authStore.authenticateWithPhonePin({
-      phone: phone.value,
+      phone: cleanPhone,
       pin: enteredPin,
     })
     if (res.success) {
@@ -122,7 +128,7 @@ async function handlePinCompleted(enteredPin) {
     }
 
     const res = await authStore.authenticateWithPhonePin({
-      phone: phone.value,
+      phone: cleanPhone,
       pin: firstPin.value,
       pin_confirmation: enteredPin,
     })
@@ -181,47 +187,92 @@ function handleGoogleError(message) {
 
 <template>
   <AuthShell :keyboard-aware="step === 'phone'">
-    <!-- Top Mobile Header -->
+    <!-- Top Mobile Header / App Brand Header -->
     <template #header>
+      <div v-if="step === 'phone'" class="w-full flex items-center justify-end pt-1">
+        <!-- Theme Toggle -->
+        <ThemeToggle />
+      </div>
+
       <AuthMobileHeader
+        v-else
         :title="headerTitle"
-        :show-back="step !== 'phone'"
+        show-back
         @back="handleBack"
       />
     </template>
 
     <!-- STEP 1: INPUT NOMOR TELEPON -->
-    <main v-if="step === 'phone'" class="flex-1 pt-8">
-      <div class="space-y-8">
-        <div class="space-y-1.5">
-          <h1
-            class="text-[32px] leading-[38px] md:text-[44px] md:leading-[52px] font-normal tracking-[-0.02em] md:tracking-[-0.03em] text-slate-900 dark:text-zinc-100"
-          >
+    <main v-if="step === 'phone'" class="flex-1 flex flex-col justify-start pt-2 md:pt-4 pb-6">
+      <div class="space-y-6 ">
+        <!-- Selamat Datang Heading -->
+        <div class="flex flex-col text-center pt-2">
+          <h1 class="text-[26px] md:text-[28px] text-slate-900 dark:text-zinc-100 font-bold tracking-tight">
             Selamat Datang!
           </h1>
-          <p class="text-base text-slate-500 dark:text-zinc-400 italic">
-            Masuk untuk melanjutkan.
+          <p class="text-sm md:text-base text-slate-500 dark:text-zinc-400 mt-1">
+            Masuk untuk memulanjutkan.
           </p>
         </div>
 
+        <!-- Form Phone Input & Actions -->
+        <form
+          id="loginForm"
+          @submit.prevent="handleCheckPhone"
+          class="flex flex-col gap-4 px-1"
+          novalidate
+        >
+          <PhoneInput
+            v-model="phone"
+            @input="onInput"
+            label="Nomor Ponsel Aktif"
+            placeholder="812-3456-7890"
+            :disabled="authStore.loading"
+            :error="authStore.validationErrors.phone"
+          />
+
+          <!-- Action Stack -->
+          <div class="flex flex-col gap-3 mt-2">
+            <!-- Tombol Utama: Lanjutkan (Primary Deep Forest) -->
+            <button
+              id="submitBtn"
+              type="submit"
+              :disabled="!isPhoneValid || authStore.loading"
+              class="w-full py-3.5 px-6 rounded-full bg-[#144229] hover:bg-[#2d5a3f] dark:bg-[#a1d2af] text-white dark:text-[#002110] font-semibold shadow-[0_10px_30px_rgba(20,66,41,0.18)] dark:shadow-[0_4px_16px_rgba(161,210,175,0.2)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <SystemRestart v-if="authStore.loading" class="w-5 h-5 animate-spin" />
+              <template v-else>
+                <span class="text-[16px] font-semibold">Lanjutkan</span>
+                <ArrowRight class="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </template>
+            </button>
+
+            
         <BaseAlert
           v-if="activeErrorMessage"
           variant="error"
           :message="activeErrorMessage"
         />
 
-        <form
-          id="login-form"
-          @submit.prevent="handleCheckPhone"
-          novalidate
-        >
-          <PhoneInput
-            v-model="phone"
-            label="Masukkan Nomor Ponsel Anda"
-            placeholder="81234567890"
-            :disabled="authStore.loading"
-            :error="authStore.validationErrors.phone"
-          />
+
+            <!-- Divider: ATAU -->
+            <div class="relative flex py-1.5 items-center">
+              <div class="flex-grow border-t border-slate-200 dark:border-zinc-800"></div>
+              <span class="flex-shrink mx-4 text-slate-400 dark:text-zinc-500 text-xs uppercase tracking-wider font-semibold">
+                Atau
+              </span>
+              <div class="flex-grow border-t border-slate-200 dark:border-zinc-800"></div>
+            </div>
+
+            <!-- Tombol Google Login (di bawah Lanjutkan) -->
+            <GoogleLoginButton
+              label="Lanjutkan dengan Google"
+              :loading="authStore.loading"
+              @success="handleGoogleSuccess"
+              @redirect="handleGoogleRedirect"
+              @error="handleGoogleError"
+            />
+          </div>
         </form>
       </div>
     </main>
@@ -237,29 +288,5 @@ function handleGoogleError(message) {
       @complete="handlePinCompleted"
       @clear-error="clearAllErrors"
     />
-
-    <!-- Bottom stack: Login dengan Google (menggantikan baris Syarat & Ketentuan) + tombol utama -->
-    <template v-if="step === 'phone'" #footer>
-      <div class="space-y-3">
-        <GoogleLoginButton
-          label="Login dengan Google"
-          :loading="authStore.loading"
-          @success="handleGoogleSuccess"
-          @redirect="handleGoogleRedirect"
-          @error="handleGoogleError"
-        />
-
-        <PrimaryButton
-          type="submit"
-          form="login-form"
-          size="lg"
-          block
-          :disabled="!isPhoneValid"
-          :loading="authStore.loading"
-        >
-          Lanjutkan
-        </PrimaryButton>
-      </div>
-    </template>
   </AuthShell>
 </template>

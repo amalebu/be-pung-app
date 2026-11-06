@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { Loader2 } from 'lucide-vue-next'
+import { SystemRestart } from '@iconoir/vue'
 
 const props = defineProps({
   label: {
@@ -93,9 +93,9 @@ async function handleGoogleClick() {
     type="button"
     :disabled="disabled || loading || sdkLoading"
     @click="handleGoogleClick"
-    class="w-full inline-flex items-center justify-center gap-3 px-6 min-h-12 py-3 rounded-md font-semibold text-sm sm:text-base bg-white/75 dark:bg-zinc-900/70 text-pod-carbon dark:text-zinc-100 border border-pod-sage/15 dark:border-zinc-700 hover:bg-white dark:hover:bg-zinc-800 hover:shadow-surface active:scale-[0.98] transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-pod-sage/40 dark:focus-visible:ring-pod-lime/50 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+    class="w-full py-3.5 px-4 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 shadow-xs active:scale-[0.98] hover:bg-slate-50 dark:hover:bg-zinc-800/80 transition-all flex items-center justify-center gap-3 font-semibold text-[15px] focus:outline-none focus-visible:ring-2 focus-visible:ring-pod-sage/40 dark:focus-visible:ring-pod-lime/50 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
   >
-    <Loader2 v-if="loading || sdkLoading" class="w-5 h-5 animate-spin text-pod-sage dark:text-pod-lime" />
+    <SystemRestart v-if="loading || sdkLoading" class="w-5 h-5 animate-spin text-pod-sage dark:text-pod-lime" />
     <svg
       v-else
       class="w-5 h-5 shrink-0"

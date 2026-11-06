@@ -3,21 +3,22 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ==========================================================================
-   Serene Pod Tactile — fonts disimpan lokal (offline-first, SIL OFL license)
+   Mint & Charcoal Financial — Typography (Manrope, offline-first & SIL OFL)
    ========================================================================== */
 @font-face {
-  font-family: 'Plus Jakarta Sans';
-  src: url('./fonts/plus-jakarta-sans-latin-wght-normal.woff2') format('woff2');
+  font-family: 'Manrope';
+  src: url('./fonts/manrope-latin-wght-normal.woff2') format('woff2');
   font-weight: 200 800;
   font-style: normal;
   font-display: swap;
 }
 
+/* Fallback local fonts preserved */
 @font-face {
   font-family: 'Plus Jakarta Sans';
-  src: url('./fonts/plus-jakarta-sans-latin-wght-italic.woff2') format('woff2');
+  src: url('./fonts/plus-jakarta-sans-latin-wght-normal.woff2') format('woff2');
   font-weight: 200 800;
-  font-style: italic;
+  font-style: normal;
   font-display: swap;
 }
 
@@ -30,79 +31,137 @@
 }
 
 @theme {
-  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-label: 'Space Grotesk', ui-monospace, 'SF Mono', monospace;
+  --font-sans: 'Manrope', 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-headline: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-label: 'Manrope', 'Space Grotesk', ui-monospace, 'SF Mono', monospace;
 
-  /* Brand tokens (semantic) */
-  --color-pod-carbon: #1a1e1b;
-  --color-pod-sage: #4a6b53;
-  --color-pod-sage-deep: #32533c;
-  --color-pod-lime: #d4f34a;
-  --color-pod-mist: #f4f7f4;
-  --color-pod-well: #eaefea;
-  --color-pod-live: #22c55e;
+  /* ========================================================================
+     Mint & Charcoal Financial — Color Palette & Semantic Tokens
+     ======================================================================== */
+  /* Surfaces & Backgrounds */
+  --color-surface: #f9f9fc;
+  --color-surface-dim: #dadadc;
+  --color-surface-bright: #f9f9fc;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f3f6;
+  --color-surface-container: #eeeef0;
+  --color-surface-container-high: #e8e8ea;
+  --color-surface-container-highest: #e2e2e5;
+  --color-surface-variant: #e2e2e5;
+  --color-surface-tint: #3a684c;
 
-  /* Material-style semantic tokens (light) */
-  --color-surface: #f7faf7;
-  --color-surface-lowest: #ffffff;
-  --color-surface-low: #f1f4f1;
-  --color-surface-container: #ecefec;
-  --color-on-surface: #181c1b;
-  --color-on-surface-variant: #424842;
-  --color-outline: #727972;
-  --color-outline-variant: #c2c8c0;
+  /* Text & Contours */
+  --color-on-surface: #1a1c1e;
+  --color-on-surface-variant: #414942;
+  --color-inverse-surface: #2f3133;
+  --color-inverse-on-surface: #f0f0f3;
+  --color-outline: #717972;
+  --color-outline-variant: #c1c9c0;
+
+  /* Primary (Deep Forest) */
+  --color-primary: #144229;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #2d5a3f;
+  --color-on-primary-container: #9fcfad;
+  --color-inverse-primary: #a1d2af;
+  --color-primary-fixed: #bceecb;
+  --color-primary-fixed-dim: #a1d2af;
+  --color-on-primary-fixed: #002110;
+  --color-on-primary-fixed-variant: #224f35;
+
+  /* Secondary (Soft Mint) */
+  --color-secondary: #526259;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #d3e4d8;
+  --color-on-secondary-container: #57665d;
+  --color-secondary-fixed: #d6e7db;
+  --color-secondary-fixed-dim: #bacbbf;
+  --color-on-secondary-fixed: #101e17;
+  --color-on-secondary-fixed-variant: #3b4a41;
+
+  /* Tertiary (Charcoal / Neutral Dark) */
+  --color-tertiary: #373b3a;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #4e5251;
+  --color-on-tertiary-container: #c2c5c3;
+  --color-tertiary-fixed: #e0e3e1;
+  --color-tertiary-fixed-dim: #c4c7c5;
+  --color-on-tertiary-fixed: #181c1b;
+  --color-on-tertiary-fixed-variant: #434846;
+
+  /* Error / Negative */
   --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
   --color-error-container: #ffdad6;
   --color-on-error-container: #93000a;
 
-  /* indigo -> sage scale (kelas brand lama otomatis ikut) */
-  --color-indigo-50: #f0f6f1;
-  --color-indigo-100: #e0ede3;
-  --color-indigo-200: #c7ecce;
-  --color-indigo-300: #abcfb2;
-  --color-indigo-400: #7fa689;
-  --color-indigo-500: #5c8366;
-  --color-indigo-600: #4a6b53;
-  --color-indigo-700: #32533c;
-  --color-indigo-800: #2e4e37;
-  --color-indigo-900: #1f3626;
-  --color-indigo-950: #01210f;
+  /* Canvas Root */
+  --color-background: #f9f9fc;
+  --color-on-background: #1a1c1e;
 
-  /* slate -> mist neutrals (light mode) */
-  --color-slate-50: #f7faf7;
-  --color-slate-100: #ecefec;
-  --color-slate-200: #e0e3e0;
-  --color-slate-300: #c2c8c0;
-  --color-slate-400: #9aa39b;
-  --color-slate-500: #727972;
-  --color-slate-600: #5a615a;
-  --color-slate-700: #424842;
-  --color-slate-800: #2d3130;
-  --color-slate-900: #181c1b;
-  --color-slate-950: #0f1210;
+  /* Legacy & Semantic Bridge Aliases */
+  --color-pod-carbon: #1a1c1e;
+  --color-pod-sage: #144229;
+  --color-pod-sage-deep: #2d5a3f;
+  --color-pod-lime: #9fcfad;
+  --color-pod-mist: #f9f9fc;
+  --color-pod-well: #f3f3f6;
+  --color-pod-live: #22c55e;
 
-  /* zinc -> dark green tiers (dark mode) */
-  --color-zinc-50: #f7faf7;
-  --color-zinc-100: #eef1ee;
-  --color-zinc-200: #dde3de;
-  --color-zinc-300: #c4ccc5;
-  --color-zinc-400: #a3ada5;
-  --color-zinc-500: #7a857d;
-  --color-zinc-600: #55615a;
-  --color-zinc-700: #3a4640;
-  --color-zinc-800: #2a352d;
-  --color-zinc-900: #1e2520;
-  --color-zinc-950: #121613;
+  /* slate -> Mint & Charcoal neutrals (Light Mode) */
+  --color-slate-50: #f9f9fc;
+  --color-slate-100: #f3f3f6;
+  --color-slate-200: #e2e2e5;
+  --color-slate-300: #c1c9c0;
+  --color-slate-400: #717972;
+  --color-slate-500: #57665d;
+  --color-slate-600: #414942;
+  --color-slate-700: #373b3a;
+  --color-slate-800: #2f3133;
+  --color-slate-900: #1a1c1e;
+  --color-slate-950: #144229;
 
-  /* Radii bernama (skala rounded-* bawaan Tailwind tidak diubah) */
-  --radius-pod: 1.5rem;
-  --radius-pod-lg: 2rem;
+  /* indigo -> Deep Forest / Mint scale */
+  --color-indigo-50: #f3f3f6;
+  --color-indigo-100: #d6e7db;
+  --color-indigo-200: #bceecb;
+  --color-indigo-300: #9fcfad;
+  --color-indigo-400: #526259;
+  --color-indigo-500: #3a684c;
+  --color-indigo-600: #2d5a3f;
+  --color-indigo-700: #144229;
+  --color-indigo-800: #101e17;
+  --color-indigo-900: #002110;
+  --color-indigo-950: #00150a;
 
-  /* Depth */
-  --shadow-surface: 0 10px 30px -5px rgba(28, 48, 33, 0.06), 0 2px 6px rgba(28, 48, 33, 0.03);
-  --shadow-well: inset 0 2px 4px rgba(22, 38, 26, 0.08), inset 0 -1px 2px rgba(255, 255, 255, 0.7);
-  --shadow-floating: 0 12px 24px -4px rgba(26, 30, 27, 0.12), 0 4px 8px -2px rgba(26, 30, 27, 0.06);
-  --shadow-bio-glow: 0 0 16px 2px rgba(212, 243, 74, 0.45);
+  /* zinc -> Dark Mode Charcoal Tiers */
+  --color-zinc-50: #f9f9fc;
+  --color-zinc-100: #f0f0f3;
+  --color-zinc-200: #e0e3e1;
+  --color-zinc-300: #c4c7c5;
+  --color-zinc-400: #717972;
+  --color-zinc-500: #57665d;
+  --color-zinc-600: #434846;
+  --color-zinc-700: #373b3a;
+  --color-zinc-800: #2f3133;
+  --color-zinc-900: #1a1c1e;
+  --color-zinc-950: #101211;
+
+  /* Radii */
+  --radius-sm: 0.25rem;
+  --radius-DEFAULT: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+  --radius-pod: 1rem;
+  --radius-pod-lg: 1.5rem;
+
+  /* Depth (Tonal Layering & Diffused Ambient Shadows) */
+  --shadow-surface: 0px 4px 20px rgba(0, 0, 0, 0.04);
+  --shadow-floating: 0px 10px 30px rgba(20, 66, 41, 0.12);
+  --shadow-well: inset 0 2px 4px rgba(0, 0, 0, 0.04), inset 0 -1px 2px rgba(255, 255, 255, 0.8);
+  --shadow-bio-glow: 0 0 16px 2px rgba(159, 207, 173, 0.45);
 
   --animate-pin-shake: pin-shake 0.38s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
@@ -139,7 +198,52 @@
     bottom: calc(env(safe-area-inset-bottom, 0px) + 4.5rem);
   }
 
-  /* Label hardware-embossed: ACTIVE POD | 01 */
+  /* Typography Scale from Mint & Charcoal Financial */
+  .font-headline-xl {
+    font-size: 32px;
+    line-height: 40px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .font-headline-lg {
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .font-headline-md {
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 600;
+  }
+  .font-body-lg {
+    font-size: 18px;
+    line-height: 26px;
+    font-weight: 400;
+  }
+  .font-body-md {
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+  }
+  .font-label-md {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .font-label-sm {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+  }
+  .font-headline-lg-mobile {
+    font-size: 22px;
+    line-height: 28px;
+    font-weight: 700;
+  }
+
+  /* Label uppercase standard */
   .label-caps {
     font-family: var(--font-label);
     font-size: 11px;
