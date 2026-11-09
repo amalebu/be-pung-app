@@ -253,3 +253,246 @@
     text-transform: uppercase;
   }
 }
+
+/* ==========================================================================
+   Smooth Transitions & Animation System
+   (Enter, Move / FLIP, Update, Delete)
+   ========================================================================== */
+
+/* 1. List Transition Group (Single-Column Lists: Todos, Stocks, Focus, Mutations) */
+.list-move,
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.list-enter-from {
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.96);
+}
+
+.list-leave-active {
+  position: absolute;
+  width: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 2. Grid List Transition Group (Responsive Grids: Habit Cards) */
+.grid-list-move,
+.grid-list-enter-active,
+.grid-list-leave-active {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.grid-list-enter-from {
+  opacity: 0;
+  transform: translateY(12px) scale(0.97);
+}
+
+.grid-list-leave-to {
+  opacity: 0;
+  transform: scale(0.94);
+}
+
+.grid-list-leave-active {
+  position: absolute;
+  width: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@media (min-width: 1024px) {
+  .grid-list-leave-active {
+    width: calc(50% - 0.5rem);
+  }
+}
+
+/* 3. Fade Transition */
+.fade-move,
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* 4. Scale / Pop Transition */
+.scale-enter-active,
+.scale-leave-active {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scale-enter-from,
+.scale-leave-to {
+  opacity: 0;
+  transform: scale(0.94);
+}
+
+/* 5. Slide-Fade Transition (For expandable subtasks, nested lot details) */
+.slide-fade-enter-active {
+  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide-fade-leave-active {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide-fade-enter-from {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+/* 6. Slide-Up Transition (Modals, Toasts, Drawer Bars) */
+.slide-up-enter-active {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide-up-leave-active {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+/* ==========================================================================
+   Reusable UI Interactive & Animation Utility Classes
+   ========================================================================== */
+
+/* Tactile interactive press feedback */
+.btn-press {
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, opacity 0.15s ease;
+}
+.btn-press:active {
+  transform: scale(0.95);
+}
+
+.card-interactive {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+.card-interactive:active {
+  transform: scale(0.99);
+}
+
+.item-press {
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.item-press:active {
+  transform: scale(0.985);
+}
+
+/* General smooth transition helper */
+.transition-smooth {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.transition-bounce {
+  transition: all 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Data update highlight flash */
+.animate-data-update {
+  animation: data-update-pulse 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes data-update-pulse {
+  0% {
+    background-color: rgba(161, 210, 175, 0.38);
+    box-shadow: 0 0 0 2px rgba(161, 210, 175, 0.5);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+/* Checkbox celebratory pop */
+.animate-check-pop {
+  animation: check-pop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes check-pop {
+  0% {
+    transform: scale(0.75);
+  }
+  60% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Pop-in element */
+.animate-pop-in {
+  animation: pop-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.93);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Fade-up element */
+.animate-fade-up {
+  animation: fade-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .list-move,
+  .list-enter-active,
+  .list-leave-active,
+  .grid-list-move,
+  .grid-list-enter-active,
+  .grid-list-leave-active,
+  .fade-enter-active,
+  .fade-leave-active,
+  .scale-enter-active,
+  .scale-leave-active,
+  .slide-fade-enter-active,
+  .slide-fade-leave-active,
+  .slide-up-enter-active,
+  .slide-up-leave-active,
+  .animate-data-update,
+  .animate-check-pop,
+  .animate-pop-in,
+  .animate-fade-up {
+    transition: none !important;
+    animation: none !important;
+  }
+}

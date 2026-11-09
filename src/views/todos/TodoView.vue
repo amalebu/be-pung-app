@@ -160,7 +160,12 @@ onMounted(() => {
       </BaseCard>
 
       <!-- State 3: Data List -->
-      <div v-else class="space-y-3">
+      <TransitionGroup
+        v-else
+        tag="div"
+        name="list"
+        class="space-y-3 relative"
+      >
         <TodoCard
           v-for="todo in todoStore.todos"
           :key="todo.id"
@@ -172,7 +177,7 @@ onMounted(() => {
           @toggle-item="handleToggleSubtask"
           @delete-item="handleDeleteSubtask"
         />
-      </div>
+      </TransitionGroup>
     </div>
   </AppShell>
 </template>

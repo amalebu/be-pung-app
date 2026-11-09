@@ -32,7 +32,12 @@ async function handleAddSubtask() {
 <template>
   <div class="mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800/80 space-y-2">
     <!-- Existing Sub-Checklist Items -->
-    <div v-if="items.length > 0" class="space-y-1.5">
+    <TransitionGroup
+      v-if="items.length > 0"
+      tag="div"
+      name="list"
+      class="space-y-1.5 relative"
+    >
       <div
         v-for="item in items"
         :key="item.id"
@@ -47,7 +52,7 @@ async function handleAddSubtask() {
             class="w-4 h-4 rounded-md flex items-center justify-center border transition-all shrink-0"
             :class="
               item.is_completed
-                ? 'bg-emerald-500 border-emerald-500 text-white'
+                ? 'bg-emerald-500 border-emerald-500 text-white animate-check-pop'
                 : 'border-slate-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 group-hover:border-indigo-400'
             "
           >
@@ -69,13 +74,13 @@ async function handleAddSubtask() {
         <button
           type="button"
           @click="emit('delete-item', { todoId, itemId: item.id })"
-          class="w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer shrink-0"
+          class="w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 btn-press cursor-pointer shrink-0"
           title="Hapus sub-checklist"
         >
           <Trash class="w-3.5 h-3.5" />
         </button>
       </div>
-    </div>
+    </TransitionGroup>
 
     <!-- Quick Inline Add Sub-Checklist -->
     <form @submit.prevent="handleAddSubtask" class="flex items-center gap-2 pt-0.5">

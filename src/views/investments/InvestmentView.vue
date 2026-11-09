@@ -209,7 +209,12 @@ onMounted(() => {
           </PrimaryButton>
         </BaseCard>
 
-        <div v-else class="space-y-2.5">
+        <TransitionGroup
+          v-else
+          tag="div"
+          name="list"
+          class="space-y-2.5 relative"
+        >
           <InvestmentStockCard
             v-for="stock in investmentStore.filteredStocks"
             :key="stock.id"
@@ -221,7 +226,7 @@ onMounted(() => {
             @close-lot="handleCloseLot"
             @close-all="handleCloseAllStock"
           />
-        </div>
+        </TransitionGroup>
       </template>
 
       <!-- ================= TAB: RIWAYAT JUAL ================= -->
@@ -242,31 +247,37 @@ onMounted(() => {
           <BaseText size="sm" variant="muted">Belum ada posisi yang ditutup.</BaseText>
         </BaseCard>
 
-        <BaseCard v-else padding="p-0" class="divide-y divide-slate-200/70 dark:divide-zinc-800 md:hidden">
-          <div
-            v-for="sale in investmentStore.sales"
-            :key="sale.id"
-            class="flex items-center gap-3 px-3.5 py-3"
+        <BaseCard v-else padding="p-0" class="md:hidden overflow-hidden">
+          <TransitionGroup
+            tag="div"
+            name="fade"
+            class="divide-y divide-slate-200/70 dark:divide-zinc-800"
           >
-            <StockAvatar :ticker="sale.ticker" :alt="sale.company_name" size="md" class="shrink-0" />
-            <div class="min-w-0 flex-1 text-xs tabular-nums">
-              <div class="font-extrabold text-sm text-[#144229] dark:text-[#a1d2af]">
-                {{ sale.ticker }}
-                <span class="font-bold text-slate-700 dark:text-zinc-200 text-xs">· {{ sale.sold_lots }} Lot</span>
+            <div
+              v-for="sale in investmentStore.sales"
+              :key="sale.id"
+              class="flex items-center gap-3 px-3.5 py-3"
+            >
+              <StockAvatar :ticker="sale.ticker" :alt="sale.company_name" size="md" class="shrink-0" />
+              <div class="min-w-0 flex-1 text-xs tabular-nums">
+                <div class="font-extrabold text-sm text-[#144229] dark:text-[#a1d2af]">
+                  {{ sale.ticker }}
+                  <span class="font-bold text-slate-700 dark:text-zinc-200 text-xs">· {{ sale.sold_lots }} Lot</span>
+                </div>
+                <div class="text-[11px] text-slate-500 dark:text-zinc-400">
+                  {{ sale.sold_at }} · {{ formatSharePrice(sale.buy_avg_price) }} → {{ formatSharePrice(sale.sell_price) }}
+                </div>
               </div>
-              <div class="text-[11px] text-slate-500 dark:text-zinc-400">
-                {{ sale.sold_at }} · {{ formatSharePrice(sale.buy_avg_price) }} → {{ formatSharePrice(sale.sell_price) }}
+              <div class="text-right text-xs tabular-nums shrink-0">
+                <div class="font-extrabold" :class="plColor(sale.realized_pl)">
+                  {{ formatRupiah(sale.realized_pl, { withSign: true }) }}
+                </div>
+                <div class="text-[11px] font-semibold" :class="plColor(sale.realized_pl)">
+                  {{ formatPercent(sale.realized_pl_percent) }}
+                </div>
               </div>
             </div>
-            <div class="text-right text-xs tabular-nums shrink-0">
-              <div class="font-extrabold" :class="plColor(sale.realized_pl)">
-                {{ formatRupiah(sale.realized_pl, { withSign: true }) }}
-              </div>
-              <div class="text-[11px] font-semibold" :class="plColor(sale.realized_pl)">
-                {{ formatPercent(sale.realized_pl_percent) }}
-              </div>
-            </div>
-          </div>
+          </TransitionGroup>
         </BaseCard>
 
         <!-- Desktop: tabel lengkap -->
@@ -287,7 +298,11 @@ onMounted(() => {
                 <th class="py-3 px-4 text-right">Realized P/L</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200/70 dark:divide-zinc-800 text-xs tabular-nums">
+            <TransitionGroup
+              tag="tbody"
+              name="fade"
+              class="divide-y divide-slate-200/70 dark:divide-zinc-800 text-xs tabular-nums"
+            >
               <tr v-for="sale in investmentStore.sales" :key="sale.id">
                 <td class="py-3 px-4 text-slate-600 dark:text-zinc-300">{{ sale.sold_at }}</td>
                 <td class="py-3 px-4">
@@ -305,7 +320,7 @@ onMounted(() => {
                   {{ formatRupiah(sale.realized_pl, { withSign: true }) }} ({{ formatPercent(sale.realized_pl_percent) }})
                 </td>
               </tr>
-            </tbody>
+            </TransitionGroup>
           </table>
         </BaseCard>
       </template>
@@ -332,40 +347,46 @@ onMounted(() => {
           <BaseText size="sm" variant="muted">Belum ada mutasi Cash RDN.</BaseText>
         </BaseCard>
 
-        <BaseCard v-else padding="p-0" class="divide-y divide-slate-200/70 dark:divide-zinc-800 md:hidden">
-          <div
-            v-for="m in investmentStore.cash.mutations"
-            :key="m.id"
-            class="flex items-center gap-3 px-3.5 py-3"
+        <BaseCard v-else padding="p-0" class="md:hidden overflow-hidden">
+          <TransitionGroup
+            tag="div"
+            name="fade"
+            class="divide-y divide-slate-200/70 dark:divide-zinc-800"
           >
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-2">
-                <BaseBadge :variant="m.amount >= 0 ? 'emerald' : 'rose'" size="xs">
-                  {{ m.type }}
-                </BaseBadge>
-                <span class="text-[11px] text-slate-500 dark:text-zinc-400 tabular-nums">
-                  {{ m.transacted_at }}
-                </span>
+            <div
+              v-for="m in investmentStore.cash.mutations"
+              :key="m.id"
+              class="flex items-center gap-3 px-3.5 py-3"
+            >
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <BaseBadge :variant="m.amount >= 0 ? 'emerald' : 'rose'" size="xs">
+                    {{ m.type }}
+                  </BaseBadge>
+                  <span class="text-[11px] text-slate-500 dark:text-zinc-400 tabular-nums">
+                    {{ m.transacted_at }}
+                  </span>
+                </div>
+                <p
+                  v-if="m.description"
+                  class="mt-1 text-xs text-slate-700 dark:text-zinc-300 truncate"
+                >
+                  {{ m.description }}
+                </p>
               </div>
-              <p
-                v-if="m.description"
-                class="mt-1 text-xs text-slate-700 dark:text-zinc-300 truncate"
-              >
-                {{ m.description }}
-              </p>
+              <div class="text-right text-xs tabular-nums shrink-0">
+                <div class="font-extrabold" :class="plColor(m.amount)">
+                  {{ formatRupiah(m.amount, { withSign: true }) }}
+                </div>
+                <div
+                  class="text-[11px]"
+                  :class="Number(m.balance_after) < 0 ? 'text-[#ba1a1a] dark:text-rose-400 font-bold' : 'text-slate-500 dark:text-zinc-400'"
+                >
+                  Saldo {{ formatRupiah(m.balance_after) }}
+                </div>
+              </div>
             </div>
-            <div class="text-right text-xs tabular-nums shrink-0">
-              <div class="font-extrabold" :class="plColor(m.amount)">
-                {{ formatRupiah(m.amount, { withSign: true }) }}
-              </div>
-              <div
-                class="text-[11px]"
-                :class="Number(m.balance_after) < 0 ? 'text-[#ba1a1a] dark:text-rose-400 font-bold' : 'text-slate-500 dark:text-zinc-400'"
-              >
-                Saldo {{ formatRupiah(m.balance_after) }}
-              </div>
-            </div>
-          </div>
+          </TransitionGroup>
         </BaseCard>
 
         <!-- Desktop: tabel lengkap -->
@@ -384,7 +405,11 @@ onMounted(() => {
                 <th class="py-3 px-4 text-right">Saldo Akhir</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200/70 dark:divide-zinc-800 text-xs tabular-nums">
+            <TransitionGroup
+              tag="tbody"
+              name="fade"
+              class="divide-y divide-slate-200/70 dark:divide-zinc-800 text-xs tabular-nums"
+            >
               <tr v-for="m in investmentStore.cash.mutations" :key="m.id">
                 <td class="py-3 px-4 text-slate-600 dark:text-zinc-300">{{ m.transacted_at }}</td>
                 <td class="py-3 px-4">
@@ -401,7 +426,7 @@ onMounted(() => {
                   {{ formatRupiah(m.balance_after) }}
                 </td>
               </tr>
-            </tbody>
+            </TransitionGroup>
           </table>
         </BaseCard>
       </template>

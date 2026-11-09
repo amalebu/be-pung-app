@@ -310,10 +310,15 @@ const priorityOptions = [
         </div>
 
         <!-- Existing Draft Items -->
-        <div v-if="items.length > 0" class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+        <TransitionGroup
+          v-if="items.length > 0"
+          tag="div"
+          name="list"
+          class="space-y-1.5 max-h-40 overflow-y-auto pr-1 relative"
+        >
           <div
             v-for="(sub, idx) in items"
-            :key="idx"
+            :key="sub.id || `draft-${idx}`"
             class="flex items-center gap-2 bg-slate-50 dark:bg-zinc-800/50 px-2.5 py-1.5 rounded-xl border border-slate-200/70 dark:border-zinc-700/60"
           >
             <button
@@ -322,7 +327,7 @@ const priorityOptions = [
               class="w-4 h-4 rounded-md flex items-center justify-center border transition-colors cursor-pointer shrink-0"
               :class="
                 sub.is_completed
-                  ? 'bg-emerald-500 border-emerald-500 text-white'
+                  ? 'bg-emerald-500 border-emerald-500 text-white animate-check-pop'
                   : 'border-slate-300 dark:border-zinc-600 bg-white dark:bg-zinc-900'
               "
             >
@@ -339,12 +344,12 @@ const priorityOptions = [
             <button
               type="button"
               @click="removeDraftSubtask(idx)"
-              class="w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-500 cursor-pointer shrink-0"
+              class="w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-500 btn-press cursor-pointer shrink-0"
             >
               <Trash class="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
+        </TransitionGroup>
 
         <!-- Add New Sub-Checklist Input -->
         <div class="flex items-center gap-2">

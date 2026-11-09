@@ -69,7 +69,12 @@ function barClass(habit) {
       <div v-for="n in 3" :key="n" class="h-16 rounded-2xl bg-[#f3f3f6] dark:bg-zinc-800/60 animate-pulse" />
     </div>
 
-    <ul v-else-if="visibleHabits.length" class="mt-4 space-y-2">
+    <TransitionGroup
+      v-else-if="visibleHabits.length"
+      tag="ul"
+      name="list"
+      class="mt-4 space-y-2 relative"
+    >
       <li
         v-for="habit in visibleHabits"
         :key="habit.id"
@@ -130,7 +135,7 @@ function barClass(habit) {
           <Plus class="w-4 h-4 stroke-[2.2]" />
         </button>
       </li>
-    </ul>
+    </TransitionGroup>
 
     <!-- Empty state -->
     <div v-else class="mt-4 flex-1 flex flex-col items-center justify-center text-center rounded-2xl border border-dashed border-[#e2e2e5] dark:border-zinc-800 px-6 py-8">

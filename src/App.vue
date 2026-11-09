@@ -22,7 +22,11 @@ onMounted(() => {
     <PwaInstallPrompt />
     <NetworkStatusToast />
     <div class="min-h-screen bg-surface dark:bg-zinc-950 text-on-surface dark:text-zinc-100 antialiased">
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <Transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </Transition>
+      </router-view>
     </div>
   </IconoirProvider>
 </template>

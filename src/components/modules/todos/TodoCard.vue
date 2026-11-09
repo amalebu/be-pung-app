@@ -43,7 +43,7 @@ const progressPercent = computed(() => {
 <template>
   <BaseCard
     padding="p-4"
-    class="transition-all duration-150"
+    class="transition-all duration-200"
     :class="
       todo.is_completed
         ? 'opacity-75 bg-slate-50/70 dark:bg-zinc-900/50'
@@ -55,10 +55,10 @@ const progressPercent = computed(() => {
       <button
         type="button"
         @click.stop="emit('toggle', todo.id)"
-        class="mt-0.5 w-5 h-5 rounded-md flex items-center justify-center border-2 transition-all cursor-pointer shrink-0 active:scale-90"
+        class="mt-0.5 w-5 h-5 rounded-md flex items-center justify-center border-2 transition-all cursor-pointer shrink-0 active:scale-85"
         :class="
           todo.is_completed
-            ? 'bg-emerald-500 border-emerald-500 text-white'
+            ? 'bg-emerald-500 border-emerald-500 text-white animate-check-pop'
             : todo.priority === 'high'
               ? 'border-rose-400 dark:border-rose-500/80 hover:border-rose-500'
               : todo.priority === 'medium'
@@ -158,14 +158,16 @@ const progressPercent = computed(() => {
         </div>
 
         <!-- Expandable Sub-Checklist Section -->
-        <TodoSubtaskList
-          v-if="expanded"
-          :todo-id="todo.id"
-          :items="todo.items || []"
-          @toggle-item="emit('toggle-item', $event)"
-          @add-item="emit('add-item', $event)"
-          @delete-item="emit('delete-item', $event)"
-        />
+        <Transition name="slide-fade">
+          <TodoSubtaskList
+            v-if="expanded"
+            :todo-id="todo.id"
+            :items="todo.items || []"
+            @toggle-item="emit('toggle-item', $event)"
+            @add-item="emit('add-item', $event)"
+            @delete-item="emit('delete-item', $event)"
+          />
+        </Transition>
       </div>
 
       <!-- Action Buttons (Edit & Delete) -->
@@ -173,7 +175,7 @@ const progressPercent = computed(() => {
         <button
           type="button"
           @click.stop="emit('edit', todo)"
-          class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+          class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-zinc-800 btn-press cursor-pointer"
           title="Edit tugas"
         >
           <EditPencil class="w-3.5 h-3.5" />
@@ -182,7 +184,7 @@ const progressPercent = computed(() => {
         <button
           type="button"
           @click.stop="emit('delete', todo.id)"
-          class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+          class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 btn-press cursor-pointer"
           title="Hapus tugas"
         >
           <Trash class="w-3.5 h-3.5" />

@@ -195,7 +195,12 @@ onMounted(() => {
       </BaseCard>
 
       <!-- State 3: Habit Cards Grid (HabitKit Style) -->
-      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <TransitionGroup
+        v-else
+        tag="div"
+        name="grid-list"
+        class="grid grid-cols-1 lg:grid-cols-2 gap-4 relative"
+      >
         <HabitCard
           v-for="habit in habitStore.habits"
           :key="habit.id"
@@ -206,7 +211,7 @@ onMounted(() => {
           @edit="habitStore.openEditSheet"
           @delete="habitStore.deleteHabit"
         />
-      </div>
+      </TransitionGroup>
     </div>
 
     <!-- Bottom Sheet for Logging/Editing Specific Calendar Date (Backfill) -->

@@ -78,7 +78,12 @@ function dueLabel(todo) {
     </div>
 
     <!-- Daftar tugas -->
-    <ul v-else-if="focusTodos.length" class="mt-4 space-y-2">
+    <TransitionGroup
+      v-else-if="focusTodos.length"
+      tag="ul"
+      name="list"
+      class="mt-4 space-y-2 relative"
+    >
       <li
         v-for="todo in focusTodos"
         :key="todo.id"
@@ -87,7 +92,7 @@ function dueLabel(todo) {
         <button
           type="button"
           @click="emit('toggle', todo.id)"
-          class="w-6 h-6 shrink-0 rounded-full border-2 border-[#c1c9c0] dark:border-zinc-600 flex items-center justify-center text-transparent hover:border-[#144229] hover:text-[#144229] dark:hover:border-[#a1d2af] dark:hover:text-[#a1d2af] transition-colors cursor-pointer"
+          class="w-6 h-6 shrink-0 rounded-full border-2 border-[#c1c9c0] dark:border-zinc-600 flex items-center justify-center text-transparent hover:border-[#144229] hover:text-[#144229] dark:hover:border-[#a1d2af] dark:hover:text-[#a1d2af] btn-press cursor-pointer"
           :title="`Tandai selesai: ${todo.title}`"
         >
           <Check class="w-3.5 h-3.5 stroke-[2.5]" />
@@ -115,7 +120,7 @@ function dueLabel(todo) {
           </div>
         </div>
       </li>
-    </ul>
+    </TransitionGroup>
 
     <!-- Empty state -->
     <div v-else class="mt-4 flex-1 flex flex-col items-center justify-center text-center rounded-2xl border border-dashed border-[#e2e2e5] dark:border-zinc-800 px-6 py-8">

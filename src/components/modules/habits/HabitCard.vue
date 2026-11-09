@@ -68,7 +68,7 @@ function handleSelectDate(dateStr) {
 </script>
 
 <template>
-  <BaseCard padding="p-4 sm:p-5" class="flex flex-col justify-between space-y-3.5">
+  <BaseCard padding="p-4 sm:p-5" class="flex flex-col justify-between space-y-3.5 transition-all duration-200">
     <!-- Top Row: Icon, Title, Badges, & Edit/Delete -->
     <div class="flex items-start justify-between gap-3">
       <div class="flex items-start gap-3 min-w-0">
@@ -123,7 +123,7 @@ function handleSelectDate(dateStr) {
         <button
           type="button"
           @click="handleSelectDate(getTodayDateStr(0))"
-          class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+          class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-zinc-800 btn-press cursor-pointer"
           title="Isi nilai spesifik / catatan hari ini"
         >
           <Calendar class="w-3.5 h-3.5" />
@@ -132,7 +132,7 @@ function handleSelectDate(dateStr) {
         <button
           type="button"
           @click="emit('edit', habit)"
-          class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+          class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-zinc-800 btn-press cursor-pointer"
           title="Edit pengaturan habit"
         >
           <EditPencil class="w-3.5 h-3.5" />
@@ -141,7 +141,7 @@ function handleSelectDate(dateStr) {
         <button
           type="button"
           @click="emit('delete', habit.id)"
-          class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+          class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 btn-press cursor-pointer"
           title="Hapus habit"
         >
           <Trash class="w-3.5 h-3.5" />
