@@ -21,6 +21,8 @@ onMounted(() => {
   <IconoirProvider>
     <PwaInstallPrompt />
     <NetworkStatusToast />
-    <router-view />
+    <div class="min-h-screen bg-surface dark:bg-zinc-950 text-on-surface dark:text-zinc-100 antialiased">
+      <router-view />
+    </div>
   </IconoirProvider>
 </template>

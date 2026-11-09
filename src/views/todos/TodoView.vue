@@ -55,25 +55,28 @@ onMounted(() => {
 
 <template>
   <AppShell>
-    <div class="space-y-5">
-      <!-- Page Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
+    <div class="space-y-3.5 md:space-y-5">
+      <!-- Page Header: ringkas di mobile (tombol "+" bawah sudah menambah tugas) -->
+      <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0">
           <BaseHeading as="h2" size="xl" weight="semibold">
-            To-Do List & Sub-Checklist
+            <span class="md:hidden">To-Do</span>
+            <span class="hidden md:inline">To-Do List & Sub-Checklist</span>
           </BaseHeading>
-          <BaseText size="sm" variant="muted" class="mt-0.5">
+          <BaseText size="sm" variant="muted" class="mt-0.5 hidden md:block">
             Kelola prioritas harian, tenggat waktu, dan rincian langkah kerja Anda.
           </BaseText>
         </div>
 
-        <PrimaryButton
-          size="md"
-          @click="todoStore.openCreateSheet()"
-        >
-          <Plus class="w-4 h-4" />
-          <span>Tambah Tugas</span>
-        </PrimaryButton>
+        <div class="hidden md:block shrink-0">
+          <PrimaryButton
+            size="md"
+            @click="todoStore.openCreateSheet()"
+          >
+            <Plus class="w-4 h-4" />
+            <span>Tambah Tugas</span>
+          </PrimaryButton>
+        </div>
       </div>
 
       <!-- Summary Metric Cards -->
@@ -94,7 +97,7 @@ onMounted(() => {
         <input
           v-model="quickTitle"
           type="text"
-          placeholder="Tambah cepat tugas hari ini lalu tekan Enter..."
+          placeholder="Tambah tugas cepat..."
           class="flex-1 bg-transparent text-sm text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none py-1.5"
         />
         <button
@@ -102,7 +105,8 @@ onMounted(() => {
           :disabled="!quickTitle.trim() || todoStore.saving"
           class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-40 transition-colors cursor-pointer shrink-0"
         >
-          Tambah Cepat
+          <span class="sm:hidden">Tambah</span>
+          <span class="hidden sm:inline">Tambah Cepat</span>
         </button>
       </form>
 

@@ -1,8 +1,9 @@
 const DB_NAME = 'personal_app_offline_db'
-const DB_VERSION = 2
+const DB_VERSION = 3
 const STORE_TODOS = 'todos'
 const STORE_HABITS = 'habits'
 const STORE_SYNC_QUEUE = 'sync_queue'
+const STORE_PORTFOLIO = 'portfolio'
 
 let dbPromise = null
 
@@ -36,6 +37,10 @@ function openDb() {
           autoIncrement: true,
         })
         queueStore.createIndex('user_id', 'user_id', { unique: false })
+      }
+
+      if (!db.objectStoreNames.contains(STORE_PORTFOLIO)) {
+        db.createObjectStore(STORE_PORTFOLIO, { keyPath: 'userId' })
       }
     }
 
@@ -109,6 +114,10 @@ export const localDb = {
               })
             )
           }
+        }
+
+        for (const pending of pendingLocalOnly) {
+          store.put(clonePlain(pending))
         }
 
         tx.oncomplete = () => resolve(true)
@@ -203,6 +212,10 @@ export const localDb = {
           }
         }
 
+        for (const pending of pendingLocalOnly) {
+          store.put(clonePlain(pending))
+        }
+
         tx.oncomplete = () => resolve(true)
         tx.onerror = () => reject(tx.error)
       })
@@ -238,6 +251,62 @@ export const localDb = {
       })
     } catch {
       return false
+    }
+  },
+
+  // ================= PORTFOLIO (INVESTMENTS) =================
+  async getCachedPortfolio(userId) {
+    const key = `personal_app_portfolio_${userId}`
+    let fallback = null
+    try {
+      const raw = localStorage.getItem(key)
+      fallback = raw ? JSON.parse(raw) : null
+    } catch {
+      fallback = null
+    }
+
+    try {
+      const db = await openDb()
+      if (!db.objectStoreNames.contains(STORE_PORTFOLIO)) {
+        return fallback
+      }
+
+      return await new Promise((resolve) => {
+        const tx = db.transaction(STORE_PORTFOLIO, 'readonly')
+        const store = tx.objectStore(STORE_PORTFOLIO)
+        const req = store.get(Number(userId))
+        req.onsuccess = () => {
+          resolve(req.result?.data || fallback)
+        }
+        req.onerror = () => resolve(fallback)
+      })
+    } catch {
+      return fallback
+    }
+  },
+
+  async saveCachedPortfolio(userId, data) {
+    if (!data) return
+    const key = `personal_app_portfolio_${userId}`
+    try {
+      localStorage.setItem(key, JSON.stringify(data))
+    } catch {
+      // Ignore localStorage quote limits
+    }
+
+    try {
+      const db = await openDb()
+      if (db.objectStoreNames.contains(STORE_PORTFOLIO)) {
+        const tx = db.transaction(STORE_PORTFOLIO, 'readwrite')
+        const store = tx.objectStore(STORE_PORTFOLIO)
+        store.put({
+          userId: Number(userId),
+          data: clonePlain(data),
+          updatedAt: Date.now(),
+        })
+      }
+    } catch {
+      // Ignore
     }
   },
 
@@ -346,15 +415,30 @@ export const localDb = {
 
   async clearAll() {
     try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i)
+        if (k && k.startsWith('personal_app_portfolio_')) {
+          localStorage.removeItem(k)
+        }
+      }
+    } catch {
+      // Ignore
+    }
+
+    try {
       const db = await openDb()
       await new Promise((resolve, reject) => {
-        const tx = db.transaction(
-          [STORE_TODOS, STORE_HABITS, STORE_SYNC_QUEUE],
-          'readwrite'
-        )
+        const stores = [STORE_TODOS, STORE_HABITS, STORE_SYNC_QUEUE]
+        if (db.objectStoreNames.contains(STORE_PORTFOLIO)) {
+          stores.push(STORE_PORTFOLIO)
+        }
+        const tx = db.transaction(stores, 'readwrite')
         tx.objectStore(STORE_TODOS).clear()
         tx.objectStore(STORE_HABITS).clear()
         tx.objectStore(STORE_SYNC_QUEUE).clear()
+        if (db.objectStoreNames.contains(STORE_PORTFOLIO)) {
+          tx.objectStore(STORE_PORTFOLIO).clear()
+        }
         tx.oncomplete = () => resolve(true)
         tx.onerror = () => reject(tx.error)
       })

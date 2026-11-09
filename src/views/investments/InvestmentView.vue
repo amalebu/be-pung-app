@@ -1,17 +1,7 @@
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import {
-  Plus,
-  RefreshDouble,
-  Wallet,
-  Search,
-  Xmark,
-  GraphUp,
-  CheckCircle,
-  Eye,
-  EyeClosed,
-} from '@iconoir/vue'
+import { RefreshDouble, Search, Xmark, GraphUp, CheckCircle, Wallet } from '@iconoir/vue'
 import AppShell from '@/components/layout/AppShell.vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
@@ -19,7 +9,6 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 import StockAvatar from '@/components/ui/StockAvatar.vue'
 import PrimaryButton from '@/components/ui/PrimaryButton.vue'
-import SecondaryButton from '@/components/ui/SecondaryButton.vue'
 import InvestmentSummaryHeader from '@/components/modules/investments/InvestmentSummaryHeader.vue'
 import InvestmentStockCard from '@/components/modules/investments/InvestmentStockCard.vue'
 import InvestmentEditLotSheet from '@/components/modules/investments/InvestmentEditLotSheet.vue'
@@ -36,10 +25,24 @@ const investmentStore = useInvestmentStore()
 const route = useRoute()
 
 const tabs = [
-  { id: 'holdings', label: 'Portofolio Saham Aktif' },
-  { id: 'sales', label: 'Riwayat Tutup Posisi (Realized)' },
-  { id: 'cash', label: 'Mutasi Cash RDN' },
+  { id: 'holdings', label: 'Saham' },
+  { id: 'sales', label: 'Riwayat' },
+  { id: 'cash', label: 'Cash' },
 ]
+
+const searchOpen = ref(false)
+
+function closeSearch() {
+  investmentStore.searchQuery = ''
+  searchOpen.value = false
+}
+
+function plColor(val) {
+  const num = Number(val || 0)
+  if (num > 0) return 'text-emerald-600 dark:text-emerald-400'
+  if (num < 0) return 'text-[#ba1a1a] dark:text-rose-400'
+  return 'text-slate-600 dark:text-zinc-400'
+}
 
 watch(
   () => route.query.tab,
@@ -88,109 +91,89 @@ onMounted(() => {
 
 <template>
   <AppShell>
-    <div class="space-y-5">
-      <!-- Page Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <BaseHeading as="h2" size="xl" weight="semibold">
-            Investment Portfolio & Saham BEI
-          </BaseHeading>
-          <BaseText size="sm" variant="muted" class="mt-0.5">
-            Pantau posisi Cash RDN, rata-rata harga beli (Avg Price) per Lot, rincian setiap pembelian, dan harga pasar Yahoo Finance.
-          </BaseText>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2">
-          <!-- Privacy Toggle Button -->
-          <SecondaryButton
-            size="sm"
-            @click="investmentStore.toggleBalanceMask()"
-            :title="investmentStore.isBalanceMasked ? 'Tampilkan Nominal Saldo' : 'Sembunyikan Nominal Saldo'"
-          >
-            <component :is="investmentStore.isBalanceMasked ? EyeClosed : Eye" class="w-4 h-4" />
-            <span class="hidden sm:inline">{{ investmentStore.isBalanceMasked ? 'Buka Saldo' : 'Tutup Saldo' }}</span>
-          </SecondaryButton>
-
-          <SecondaryButton
-            size="sm"
-            :disabled="investmentStore.refreshingPrices"
-            @click="investmentStore.refreshMarketPrices()"
-          >
-            <RefreshDouble
-              class="w-4 h-4"
-              :class="{ 'animate-spin': investmentStore.refreshingPrices }"
-            />
-            <span>{{ investmentStore.refreshingPrices ? 'Memperbarui...' : 'Refresh Harga' }}</span>
-          </SecondaryButton>
-
-          <SecondaryButton
-            size="sm"
-            @click="investmentStore.openCashSheet('topup')"
-          >
-            <Wallet class="w-4 h-4" />
-            <span>Cash RDN</span>
-          </SecondaryButton>
-
-          <PrimaryButton
-            size="sm"
-            @click="investmentStore.openBuySheet()"
-          >
-            <Plus class="w-4 h-4" />
-            <span>+ Beli Saham</span>
-          </PrimaryButton>
-        </div>
+    <div class="space-y-3.5 md:space-y-5">
+      <!-- Judul: hanya desktop -->
+      <div class="hidden md:block">
+        <BaseHeading as="h2" size="xl" weight="semibold">Investment Portfolio & Saham BEI</BaseHeading>
+        <BaseText size="sm" variant="muted" class="mt-0.5">
+          Pantau posisi Cash RDN, rata-rata harga beli per lot, rincian setiap pembelian, dan harga pasar Yahoo Finance.
+        </BaseText>
       </div>
 
-      <!-- Summary Banner (Total Portfolio + Cash RDN + 4 Metric Cards) -->
+      <!-- Ringkasan: hero + cash (Beli Saham via tombol + global di AppShell) -->
       <InvestmentSummaryHeader
         :summary="investmentStore.summary"
         :is-masked="investmentStore.isBalanceMasked"
         @toggle-privacy="investmentStore.toggleBalanceMask()"
         @open-cash="(mode) => investmentStore.openCashSheet(mode)"
-        @open-buy="investmentStore.openBuySheet()"
       />
 
-      <!-- Navigation Tabs & Search Filter -->
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
-          <button
-            v-for="tab in tabs"
-            :key="tab.id"
-            type="button"
-            @click="investmentStore.activeTab = tab.id"
-            class="px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0"
-            :class="
-              investmentStore.activeTab === tab.id
-                ? 'bg-[#144229] text-white shadow-xs'
-                : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 border border-[#e2e2e5] dark:border-zinc-800 hover:bg-[#f3f3f6] dark:hover:bg-zinc-800'
-            "
-          >
-            {{ tab.label }}
-          </button>
-        </div>
+      <!-- Toolbar: Tab + Cari + Refresh -->
+      <div class="flex items-center gap-2">
+        <template v-if="!searchOpen">
+          <div class="flex items-center gap-1.5 flex-1 min-w-0">
+            <button
+              v-for="tab in tabs"
+              :key="tab.id"
+              type="button"
+              @click="investmentStore.activeTab = tab.id"
+              class="px-4 h-9 rounded-full text-xs font-bold transition-all cursor-pointer"
+              :class="
+                investmentStore.activeTab === tab.id
+                  ? 'bg-[#144229] text-white dark:bg-[#a1d2af] dark:text-[#002110]'
+                  : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 border border-[#e2e2e5] dark:border-zinc-800'
+              "
+            >
+              {{ tab.label }}
+            </button>
+          </div>
 
-        <div v-if="investmentStore.activeTab === 'holdings'" class="relative sm:w-64">
+          <button
+            v-if="investmentStore.activeTab === 'holdings'"
+            type="button"
+            @click="searchOpen = true"
+            class="w-9 h-9 rounded-full flex items-center justify-center bg-white dark:bg-zinc-900 border border-[#e2e2e5] dark:border-zinc-800 text-slate-600 dark:text-zinc-300 cursor-pointer"
+            aria-label="Cari saham"
+          >
+            <Search class="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            :disabled="investmentStore.refreshingPrices"
+            @click="investmentStore.refreshMarketPrices()"
+            class="w-9 h-9 rounded-full flex items-center justify-center bg-white dark:bg-zinc-900 border border-[#e2e2e5] dark:border-zinc-800 text-slate-600 dark:text-zinc-300 cursor-pointer disabled:opacity-60"
+            aria-label="Refresh harga"
+          >
+            <RefreshDouble
+              class="w-4 h-4"
+              :class="{ 'animate-spin': investmentStore.refreshingPrices }"
+            />
+          </button>
+        </template>
+
+        <div v-else class="relative flex-1">
           <Search class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             v-model="investmentStore.searchQuery"
             type="text"
+            autofocus
             placeholder="Cari kode / nama saham..."
-            class="w-full pl-9 pr-8 py-2 rounded-full text-xs sm:text-sm bg-white dark:bg-zinc-900 border border-[#e2e2e5] dark:border-zinc-800 text-slate-900 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:border-[#144229]"
+            class="w-full h-9 pl-9 pr-9 rounded-full text-sm bg-white dark:bg-zinc-900 border border-[#e2e2e5] dark:border-zinc-800 text-slate-900 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:border-[#144229]"
           />
           <button
-            v-if="investmentStore.searchQuery"
             type="button"
-            @click="investmentStore.searchQuery = ''"
-            class="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 cursor-pointer"
+            @click="closeSearch"
+            class="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center text-slate-400 cursor-pointer"
+            aria-label="Tutup pencarian"
           >
-            <Xmark class="w-3.5 h-3.5" />
+            <Xmark class="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      <!-- ================= TAB 1: PORTOFOLIO SAHAM AKTIF ================= -->
+      <!-- ================= TAB: SAHAM ================= -->
       <template v-if="investmentStore.activeTab === 'holdings'">
-        <!-- Loading Skeleton -->
         <div
           v-if="investmentStore.loading && investmentStore.stocks.length === 0"
           class="space-y-3"
@@ -198,47 +181,35 @@ onMounted(() => {
           <div
             v-for="n in 3"
             :key="n"
-            class="p-5 rounded-2xl border border-[#e2e2e5] dark:border-zinc-800 bg-white dark:bg-zinc-900 animate-pulse space-y-3"
-          >
-            <div class="h-5 bg-slate-200 dark:bg-zinc-800 rounded w-1/3" />
-            <div class="h-8 bg-slate-100 dark:bg-zinc-800/70 rounded" />
-          </div>
+            class="h-16 rounded-2xl border border-[#e2e2e5] dark:border-zinc-800 bg-white dark:bg-zinc-900 animate-pulse"
+          />
         </div>
 
-        <!-- Empty State -->
         <BaseCard
           v-else-if="investmentStore.filteredStocks.length === 0"
-          padding="p-8 sm:p-10"
+          padding="p-8"
           class="text-center"
         >
           <div class="w-12 h-12 rounded-2xl bg-[#d3e4d8]/60 dark:bg-[#2d5a3f]/50 text-[#144229] dark:text-[#a1d2af] flex items-center justify-center mx-auto mb-3">
             <GraphUp class="w-6 h-6" />
           </div>
           <BaseHeading as="h3" size="md" weight="semibold">
-            Belum Ada Posisi Saham Aktif
+            {{ investmentStore.searchQuery ? 'Saham tidak ditemukan' : 'Belum ada saham' }}
           </BaseHeading>
-          <BaseText size="xs" variant="muted" class="mt-1 max-w-md mx-auto">
-            Catat pembelian saham (misal BBCA 5 lot × 5.000 lalu 5 lot × 5.200) untuk melihat kalkulasi otomatis rata-rata harga (Avg Price) dan rincian setiap lot pembelian.
+          <BaseText v-if="!investmentStore.searchQuery" size="xs" variant="muted" class="mt-1">
+            Catat pembelian pertamamu untuk melihat harga rata-rata otomatis.
           </BaseText>
-          <div class="mt-4 flex flex-wrap items-center justify-center gap-2.5">
-            <PrimaryButton size="md" @click="investmentStore.openBuySheet()">
-              <Plus class="w-4 h-4" />
-              <span>Beli Saham Pertama</span>
-            </PrimaryButton>
-            <SecondaryButton size="md" @click="investmentStore.openCashSheet('topup')">
-              <Wallet class="w-4 h-4" />
-              <span>Top-Up Cash RDN</span>
-            </SecondaryButton>
-          </div>
+          <PrimaryButton
+            v-if="!investmentStore.searchQuery"
+            size="md"
+            class="mt-4"
+            @click="investmentStore.openBuySheet()"
+          >
+            Beli Saham Pertama
+          </PrimaryButton>
         </BaseCard>
 
-        <!-- Daftar Kartu Emiten Saham (Klik untuk Expand Detail Lot) -->
-        <div v-else class="space-y-3">
-          <div class="flex items-center justify-between px-1 text-[11px] font-medium text-slate-500 dark:text-zinc-400">
-            <span>Klik kartu saham untuk melihat rincian setiap pembelian, Edit Posisi, atau Tutup Posisi</span>
-            <span class="tabular-nums">{{ investmentStore.filteredStocks.length }} emiten aktif</span>
-          </div>
-
+        <div v-else class="space-y-2.5">
           <InvestmentStockCard
             v-for="stock in investmentStore.filteredStocks"
             :key="stock.id"
@@ -253,141 +224,185 @@ onMounted(() => {
         </div>
       </template>
 
-      <!-- ================= TAB 2: RIWAYAT TUTUP POSISI (REALIZED P/L) ================= -->
+      <!-- ================= TAB: RIWAYAT JUAL ================= -->
       <template v-else-if="investmentStore.activeTab === 'sales'">
-        <BaseCard
-          v-if="investmentStore.sales.length === 0"
-          padding="p-8 text-center"
+        <div
+          v-if="investmentStore.loading && investmentStore.sales.length === 0"
+          class="space-y-3"
         >
+          <div
+            v-for="n in 3"
+            :key="n"
+            class="h-16 rounded-2xl border border-[#e2e2e5] dark:border-zinc-800 bg-white dark:bg-zinc-900 animate-pulse"
+          />
+        </div>
+
+        <BaseCard v-else-if="investmentStore.sales.length === 0" padding="p-8" class="text-center">
           <CheckCircle class="w-10 h-10 text-slate-300 dark:text-zinc-600 mx-auto mb-2" />
-          <BaseHeading as="h3" size="sm" weight="semibold">
-            Belum Ada Riwayat Penutupan Posisi
-          </BaseHeading>
-          <BaseText size="xs" variant="muted" class="mt-1">
-            Saat Anda menekan tombol "Tutup Posisi" pada rincian lot saham, histori keuntungan/kerugian bersih (Realized P/L) akan tercatat di sini.
-          </BaseText>
+          <BaseText size="sm" variant="muted">Belum ada posisi yang ditutup.</BaseText>
         </BaseCard>
 
-        <BaseCard v-else padding="p-0" class="overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-[600px]">
-              <thead>
-                <tr class="border-b border-slate-200 dark:border-zinc-800 bg-[#f3f3f6]/60 dark:bg-zinc-800/50 text-[11px] font-bold text-slate-600 dark:text-zinc-400">
-                  <th class="py-3 px-4">Tanggal Jual</th>
-                  <th class="py-3 px-4">Emiten</th>
-                  <th class="py-3 px-4">Jumlah Lot</th>
-                  <th class="py-3 px-4">Harga Beli Avg</th>
-                  <th class="py-3 px-4">Harga Jual</th>
-                  <th class="py-3 px-4">Hasil Bersih</th>
-                  <th class="py-3 px-4 text-right">Realized P/L</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-200/70 dark:divide-zinc-800 text-xs tabular-nums">
-                <tr v-for="sale in investmentStore.sales" :key="sale.id">
-                  <td class="py-3 px-4 font-medium text-slate-600 dark:text-zinc-300">
-                    {{ sale.sold_at }}
-                  </td>
-                  <td class="py-3 px-4">
-                    <div class="flex items-center gap-2.5">
-                      <StockAvatar :ticker="sale.ticker" :alt="sale.company_name" size="sm" />
-                      <div class="min-w-0">
-                        <span class="font-extrabold text-[#144229] dark:text-[#a1d2af]">{{ sale.ticker }}</span>
-                        <span class="text-slate-500 ml-1.5 text-xs truncate">{{ sale.company_name }}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="py-3 px-4 font-bold">
-                    {{ sale.sold_lots }} Lot ({{ sale.sold_shares }} lbr)
-                  </td>
-                  <td class="py-3 px-4">
-                    Rp {{ formatSharePrice(sale.buy_avg_price) }}
-                  </td>
-                  <td class="py-3 px-4 font-bold">
-                    Rp {{ formatSharePrice(sale.sell_price) }}
-                  </td>
-                  <td class="py-3 px-4 font-semibold">
-                    {{ formatRupiah(sale.net_proceeds) }}
-                  </td>
-                  <td class="py-3 px-4 text-right font-extrabold">
-                    <span
-                      :class="
-                        sale.realized_pl > 0
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : sale.realized_pl < 0
-                            ? 'text-[#ba1a1a] dark:text-rose-400'
-                            : 'text-slate-600'
-                      "
-                    >
-                      {{ formatRupiah(sale.realized_pl, { withSign: true }) }}
-                      ({{ formatPercent(sale.realized_pl_percent) }})
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        <BaseCard v-else padding="p-0" class="divide-y divide-slate-200/70 dark:divide-zinc-800 md:hidden">
+          <div
+            v-for="sale in investmentStore.sales"
+            :key="sale.id"
+            class="flex items-center gap-3 px-3.5 py-3"
+          >
+            <StockAvatar :ticker="sale.ticker" :alt="sale.company_name" size="md" class="shrink-0" />
+            <div class="min-w-0 flex-1 text-xs tabular-nums">
+              <div class="font-extrabold text-sm text-[#144229] dark:text-[#a1d2af]">
+                {{ sale.ticker }}
+                <span class="font-bold text-slate-700 dark:text-zinc-200 text-xs">· {{ sale.sold_lots }} Lot</span>
+              </div>
+              <div class="text-[11px] text-slate-500 dark:text-zinc-400">
+                {{ sale.sold_at }} · {{ formatSharePrice(sale.buy_avg_price) }} → {{ formatSharePrice(sale.sell_price) }}
+              </div>
+            </div>
+            <div class="text-right text-xs tabular-nums shrink-0">
+              <div class="font-extrabold" :class="plColor(sale.realized_pl)">
+                {{ formatRupiah(sale.realized_pl, { withSign: true }) }}
+              </div>
+              <div class="text-[11px] font-semibold" :class="plColor(sale.realized_pl)">
+                {{ formatPercent(sale.realized_pl_percent) }}
+              </div>
+            </div>
           </div>
+        </BaseCard>
+
+        <!-- Desktop: tabel lengkap -->
+        <BaseCard
+          v-if="investmentStore.sales.length > 0"
+          padding="p-0"
+          class="hidden md:block overflow-hidden"
+        >
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-zinc-800 bg-[#f3f3f6]/60 dark:bg-zinc-800/50 text-[11px] font-bold text-slate-600 dark:text-zinc-400">
+                <th class="py-3 px-4">Tanggal Jual</th>
+                <th class="py-3 px-4">Emiten</th>
+                <th class="py-3 px-4 text-right">Lot</th>
+                <th class="py-3 px-4 text-right">Avg Beli</th>
+                <th class="py-3 px-4 text-right">Harga Jual</th>
+                <th class="py-3 px-4 text-right">Hasil Bersih</th>
+                <th class="py-3 px-4 text-right">Realized P/L</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200/70 dark:divide-zinc-800 text-xs tabular-nums">
+              <tr v-for="sale in investmentStore.sales" :key="sale.id">
+                <td class="py-3 px-4 text-slate-600 dark:text-zinc-300">{{ sale.sold_at }}</td>
+                <td class="py-3 px-4">
+                  <div class="flex items-center gap-2.5">
+                    <StockAvatar :ticker="sale.ticker" :alt="sale.company_name" size="sm" />
+                    <span class="font-extrabold text-[#144229] dark:text-[#a1d2af]">{{ sale.ticker }}</span>
+                    <span class="text-slate-500 truncate max-w-[200px]">{{ sale.company_name }}</span>
+                  </div>
+                </td>
+                <td class="py-3 px-4 text-right font-bold">{{ sale.sold_lots }} ({{ sale.sold_shares }} lbr)</td>
+                <td class="py-3 px-4 text-right">Rp {{ formatSharePrice(sale.buy_avg_price) }}</td>
+                <td class="py-3 px-4 text-right font-bold">Rp {{ formatSharePrice(sale.sell_price) }}</td>
+                <td class="py-3 px-4 text-right font-semibold">{{ formatRupiah(sale.net_proceeds) }}</td>
+                <td class="py-3 px-4 text-right font-extrabold" :class="plColor(sale.realized_pl)">
+                  {{ formatRupiah(sale.realized_pl, { withSign: true }) }} ({{ formatPercent(sale.realized_pl_percent) }})
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </BaseCard>
       </template>
 
-      <!-- ================= TAB 3: MUTASI CASH RDN ================= -->
+      <!-- ================= TAB: MUTASI CASH ================= -->
       <template v-else>
+        <div
+          v-if="investmentStore.loading && (!investmentStore.cash.mutations || investmentStore.cash.mutations.length === 0)"
+          class="space-y-3"
+        >
+          <div
+            v-for="n in 3"
+            :key="n"
+            class="h-16 rounded-2xl border border-[#e2e2e5] dark:border-zinc-800 bg-white dark:bg-zinc-900 animate-pulse"
+          />
+        </div>
+
         <BaseCard
-          v-if="!investmentStore.cash.mutations || investmentStore.cash.mutations.length === 0"
-          padding="p-8 text-center"
+          v-else-if="!investmentStore.cash.mutations || investmentStore.cash.mutations.length === 0"
+          padding="p-8"
+          class="text-center"
         >
           <Wallet class="w-10 h-10 text-slate-300 dark:text-zinc-600 mx-auto mb-2" />
-          <BaseHeading as="h3" size="sm" weight="semibold">
-            Belum Ada Riwayat Mutasi Cash RDN
-          </BaseHeading>
-          <BaseText size="xs" variant="muted" class="mt-1">
-            Silakan lakukan Top-Up saldo awal Cash RDN Anda untuk mulai mencatat arus dana investasi.
-          </BaseText>
+          <BaseText size="sm" variant="muted">Belum ada mutasi Cash RDN.</BaseText>
         </BaseCard>
 
-        <BaseCard v-else padding="p-0" class="overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-[540px]">
-              <thead>
-                <tr class="border-b border-slate-200 dark:border-zinc-800 bg-[#f3f3f6]/60 dark:bg-zinc-800/50 text-[11px] font-bold text-slate-600 dark:text-zinc-400">
-                  <th class="py-3 px-4">Tanggal</th>
-                  <th class="py-3 px-4">Tipe</th>
-                  <th class="py-3 px-4">Keterangan</th>
-                  <th class="py-3 px-4 text-right">Mutasi</th>
-                  <th class="py-3 px-4 text-right">Saldo Akhir</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-200/70 dark:divide-zinc-800 text-xs tabular-nums">
-                <tr v-for="m in investmentStore.cash.mutations" :key="m.id">
-                  <td class="py-3 px-4 text-slate-600 dark:text-zinc-300">
-                    {{ m.transacted_at }}
-                  </td>
-                  <td class="py-3 px-4">
-                    <BaseBadge
-                      :variant="m.amount >= 0 ? 'emerald' : 'rose'"
-                      size="xs"
-                    >
-                      {{ m.type }}
-                    </BaseBadge>
-                  </td>
-                  <td class="py-3 px-4 font-medium text-slate-800 dark:text-zinc-200">
-                    {{ m.description }}
-                  </td>
-                  <td
-                    class="py-3 px-4 text-right font-extrabold"
-                    :class="m.amount >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#ba1a1a] dark:text-rose-400'"
-                  >
-                    {{ formatRupiah(m.amount, { withSign: true }) }}
-                  </td>
-                  <td
-                    class="py-3 px-4 text-right tabular-nums"
-                    :class="Number(m.balance_after) < 0 ? 'text-[#ba1a1a] dark:text-rose-400 font-extrabold' : 'text-slate-900 dark:text-zinc-100 font-bold'"
-                  >
-                    {{ formatRupiah(m.balance_after) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        <BaseCard v-else padding="p-0" class="divide-y divide-slate-200/70 dark:divide-zinc-800 md:hidden">
+          <div
+            v-for="m in investmentStore.cash.mutations"
+            :key="m.id"
+            class="flex items-center gap-3 px-3.5 py-3"
+          >
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <BaseBadge :variant="m.amount >= 0 ? 'emerald' : 'rose'" size="xs">
+                  {{ m.type }}
+                </BaseBadge>
+                <span class="text-[11px] text-slate-500 dark:text-zinc-400 tabular-nums">
+                  {{ m.transacted_at }}
+                </span>
+              </div>
+              <p
+                v-if="m.description"
+                class="mt-1 text-xs text-slate-700 dark:text-zinc-300 truncate"
+              >
+                {{ m.description }}
+              </p>
+            </div>
+            <div class="text-right text-xs tabular-nums shrink-0">
+              <div class="font-extrabold" :class="plColor(m.amount)">
+                {{ formatRupiah(m.amount, { withSign: true }) }}
+              </div>
+              <div
+                class="text-[11px]"
+                :class="Number(m.balance_after) < 0 ? 'text-[#ba1a1a] dark:text-rose-400 font-bold' : 'text-slate-500 dark:text-zinc-400'"
+              >
+                Saldo {{ formatRupiah(m.balance_after) }}
+              </div>
+            </div>
           </div>
+        </BaseCard>
+
+        <!-- Desktop: tabel lengkap -->
+        <BaseCard
+          v-if="investmentStore.cash.mutations && investmentStore.cash.mutations.length > 0"
+          padding="p-0"
+          class="hidden md:block overflow-hidden"
+        >
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-zinc-800 bg-[#f3f3f6]/60 dark:bg-zinc-800/50 text-[11px] font-bold text-slate-600 dark:text-zinc-400">
+                <th class="py-3 px-4">Tanggal</th>
+                <th class="py-3 px-4">Tipe</th>
+                <th class="py-3 px-4">Keterangan</th>
+                <th class="py-3 px-4 text-right">Mutasi</th>
+                <th class="py-3 px-4 text-right">Saldo Akhir</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200/70 dark:divide-zinc-800 text-xs tabular-nums">
+              <tr v-for="m in investmentStore.cash.mutations" :key="m.id">
+                <td class="py-3 px-4 text-slate-600 dark:text-zinc-300">{{ m.transacted_at }}</td>
+                <td class="py-3 px-4">
+                  <BaseBadge :variant="m.amount >= 0 ? 'emerald' : 'rose'" size="xs">{{ m.type }}</BaseBadge>
+                </td>
+                <td class="py-3 px-4 font-medium text-slate-800 dark:text-zinc-200">{{ m.description }}</td>
+                <td class="py-3 px-4 text-right font-extrabold" :class="plColor(m.amount)">
+                  {{ formatRupiah(m.amount, { withSign: true }) }}
+                </td>
+                <td
+                  class="py-3 px-4 text-right"
+                  :class="Number(m.balance_after) < 0 ? 'text-[#ba1a1a] dark:text-rose-400 font-extrabold' : 'text-slate-900 dark:text-zinc-100 font-bold'"
+                >
+                  {{ formatRupiah(m.balance_after) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </BaseCard>
       </template>
     </div>

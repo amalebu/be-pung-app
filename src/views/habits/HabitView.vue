@@ -65,19 +65,20 @@ onMounted(() => {
 
 <template>
   <AppShell>
-    <div class="space-y-5">
-      <!-- Page Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
+    <div class="space-y-3.5 md:space-y-5">
+      <!-- Page Header: ringkas di mobile, lengkap di desktop -->
+      <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0">
           <BaseHeading as="h2" size="xl" weight="semibold">
-            Habit Tracker & GitHub Heatmap
+            <span class="md:hidden">Habit</span>
+            <span class="hidden md:inline">Habit Tracker & GitHub Heatmap</span>
           </BaseHeading>
-          <BaseText size="sm" variant="muted" class="mt-0.5">
+          <BaseText size="sm" variant="muted" class="mt-0.5 hidden md:block">
             Bangun kebiasaan baik (Hijau) & hilangkan kebiasaan buruk (Putih/Merah) dengan kalender konsistensi.
           </BaseText>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 shrink-0">
           <SecondaryButton
             size="sm"
             @click="habitStore.openCreateSheet('bad')"
@@ -86,13 +87,16 @@ onMounted(() => {
             <span>+ Bad Habit</span>
           </SecondaryButton>
 
-          <PrimaryButton
-            size="sm"
-            @click="habitStore.openCreateSheet('good')"
-          >
-            <Plus class="w-4 h-4" />
-            <span>+ Good Habit</span>
-          </PrimaryButton>
+          <!-- Di mobile tombol "+" bawah sudah membuat Good Habit -->
+          <div class="hidden md:block">
+            <PrimaryButton
+              size="sm"
+              @click="habitStore.openCreateSheet('good')"
+            >
+              <Plus class="w-4 h-4" />
+              <span>+ Good Habit</span>
+            </PrimaryButton>
+          </div>
         </div>
       </div>
 
@@ -103,8 +107,10 @@ onMounted(() => {
         @select-type="habitStore.setTypeFilter"
       />
 
-      <!-- GitHub Contribution Heatmap Overview + Color Saturation Legend -->
-      <HabitOverallHeatmap :habits="habitStore.habits" />
+      <!-- Heatmap keseluruhan: hanya desktop agar mobile tetap ringkas -->
+      <div class="hidden md:block">
+        <HabitOverallHeatmap :habits="habitStore.habits" />
+      </div>
 
       <!-- Filter Tabs & Search Box -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">

@@ -65,7 +65,7 @@ onMounted(() => {
 
 <template>
   <AppShell>
-    <div class="space-y-4 sm:space-y-5">
+    <div class="space-y-3.5 sm:space-y-5">
       <!-- Baris 1: Hero progres + Grafik mingguan -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         <DashboardHero
@@ -144,7 +144,7 @@ onMounted(() => {
           <div class="min-w-0">
             <div class="flex items-center gap-2">
               <p class="text-sm font-bold text-slate-900 dark:text-zinc-100">Portofolio Investasi & Saham</p>
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#144229]/10 text-[#144229] dark:bg-[#a1d2af]/20 dark:text-[#a1d2af]">
+              <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#144229]/10 text-[#144229] dark:bg-[#a1d2af]/20 dark:text-[#a1d2af]">
                 BEI / IDX
               </span>
               <button
@@ -196,7 +196,7 @@ onMounted(() => {
 
       <!-- Baris 5: Teaser modul Finance -->
       <section
-        class="relative overflow-hidden flex items-center gap-4 rounded-3xl p-5 bg-[#f3f3f6] dark:bg-zinc-900 border border-[#e2e2e5] dark:border-zinc-800"
+        class="hidden md:flex relative overflow-hidden items-center gap-4 rounded-3xl p-5 bg-[#f3f3f6] dark:bg-zinc-900 border border-[#e2e2e5] dark:border-zinc-800"
       >
         <span class="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center bg-white dark:bg-zinc-800 text-[#144229] dark:text-[#a1d2af] shadow-surface">
           <Wallet class="w-5 h-5" />

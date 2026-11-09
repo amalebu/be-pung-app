@@ -197,7 +197,7 @@ async function handleGoogleRedirect() {
 
 <template>
   <AppShell>
-    <div class="space-y-6 max-w-4xl mx-auto">
+    <div class="space-y-4 md:space-y-6 max-w-4xl mx-auto">
       <!-- Breadcrumb & Page Header -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -213,7 +213,7 @@ async function handleGoogleRedirect() {
             <BaseHeading as="h1" size="xl" weight="semibold">
               Profil Pengguna
             </BaseHeading>
-            <BaseText size="sm" variant="muted" class="mt-0.5">
+            <BaseText size="sm" variant="muted" class="mt-0.5 hidden md:block">
               Kelola identitas, foto profil, dan tautkan akun login Anda
             </BaseText>
           </div>
@@ -226,7 +226,7 @@ async function handleGoogleRedirect() {
       </div>
 
       <!-- Section 1: Profil & Foto Avatar -->
-      <BaseCard class="p-6">
+      <BaseCard class="p-4 sm:p-6">
         <div class="flex items-center gap-2 mb-6 pb-4 border-b border-slate-200/80 dark:border-zinc-800">
           <User class="w-5 h-5 text-emerald-600 dark:text-lime-400" />
           <BaseHeading as="h2" size="md" weight="semibold">
@@ -301,7 +301,7 @@ async function handleGoogleRedirect() {
       </BaseCard>
 
       <!-- Section 2: Hubungkan Akun (Account Linking) -->
-      <BaseCard class="p-6">
+      <BaseCard class="p-4 sm:p-6">
         <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/80 dark:border-zinc-800">
           <div class="flex items-center gap-2">
             <Link class="w-5 h-5 text-indigo-600 dark:text-indigo-400" />

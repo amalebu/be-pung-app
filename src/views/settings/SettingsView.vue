@@ -35,7 +35,7 @@ async function handleClearLocalData() {
 
 <template>
   <AppShell>
-    <div class="space-y-6 max-w-4xl mx-auto">
+    <div class="space-y-4 md:space-y-6 max-w-4xl mx-auto">
       <!-- Breadcrumb & Header -->
       <div class="flex items-center gap-3">
         <button
@@ -50,14 +50,14 @@ async function handleClearLocalData() {
           <BaseHeading as="h1" size="xl" weight="semibold">
             Pengaturan Aplikasi
           </BaseHeading>
-          <BaseText size="sm" variant="muted" class="mt-0.5">
+          <BaseText size="sm" variant="muted" class="mt-0.5 hidden md:block">
             Preferensi antarmuka, keamanan PIN, dan sinkronisasi lokal
           </BaseText>
         </div>
       </div>
 
       <!-- Tampilan & Tema -->
-      <BaseCard class="p-6">
+      <BaseCard class="p-4 sm:p-6">
         <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-200/80 dark:border-zinc-800">
           <SunLight v-if="!isDark" class="w-5 h-5 text-amber-500" />
           <HalfMoon v-else class="w-5 h-5 text-pod-lime" />
@@ -95,7 +95,7 @@ async function handleClearLocalData() {
       </BaseCard>
 
       <!-- Keamanan & Layar PIN -->
-      <BaseCard class="p-6">
+      <BaseCard class="p-4 sm:p-6">
         <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-200/80 dark:border-zinc-800">
           <Shield class="w-5 h-5 text-emerald-600 dark:text-lime-400" />
           <BaseHeading as="h2" size="md" weight="semibold">
@@ -138,7 +138,7 @@ async function handleClearLocalData() {
       </BaseCard>
 
       <!-- Penyimpanan & Cache Offline -->
-      <BaseCard class="p-6">
+      <BaseCard class="p-4 sm:p-6">
         <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-200/80 dark:border-zinc-800">
           <Database class="w-5 h-5 text-teal-600 dark:text-teal-400" />
           <BaseHeading as="h2" size="md" weight="semibold">

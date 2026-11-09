@@ -166,12 +166,21 @@ export const useInvestmentStore = defineStore('investment', () => {
     clearErrors()
     const userId = getCurrentUserId()
 
-    const cached = await localDb.getCachedPortfolio(userId)
-    if (cached) {
-      applyPortfolioPayload(cached)
+    try {
+      const cached = await localDb.getCachedPortfolio(userId)
+      if (cached) {
+        applyPortfolioPayload(cached)
+      }
+    } catch {
+      // Ignore cache reading error
     }
 
-    loading.value = stocks.value.length === 0 && !cached
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      loading.value = false
+      return { success: true, offline: true }
+    }
+
+    loading.value = stocks.value.length === 0
     if (forceRefresh) refreshingPrices.value = true
 
     try {
@@ -182,6 +191,10 @@ export const useInvestmentStore = defineStore('investment', () => {
       }
       return { success: true }
     } catch (err) {
+      if (!err.response) {
+        // Offline / network failure: keep current cached data active
+        return { success: true, offline: true }
+      }
       errorMessage.value =
         err.response?.data?.message || 'Gagal memuat data portofolio investasi.'
       return { success: false }
