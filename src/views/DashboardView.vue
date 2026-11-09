@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { CheckCircle, WarningTriangle, Spark, FireFlame, Wallet, Lock, GraphUp, ArrowRight, Eye, EyeClosed } from '@iconoir/vue'
 import AppShell from '@/components/layout/AppShell.vue'
 import DashboardHero from '@/components/modules/dashboard/DashboardHero.vue'
@@ -7,6 +8,7 @@ import DashboardStatTile from '@/components/modules/dashboard/DashboardStatTile.
 import DashboardWeeklyChart from '@/components/modules/dashboard/DashboardWeeklyChart.vue'
 import DashboardFocusList from '@/components/modules/dashboard/DashboardFocusList.vue'
 import DashboardHabitList from '@/components/modules/dashboard/DashboardHabitList.vue'
+import StockAllocationChart from '@/components/modules/investments/StockAllocationChart.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useTodoStore } from '@/stores/todoStore'
 import { useHabitStore, getTodayDateStr } from '@/stores/habitStore'
@@ -53,6 +55,15 @@ async function handleIncrementHabit(habit) {
     mode: 'increment',
     value: step,
   })
+}
+
+const router = useRouter()
+
+function goToInvestmentsWithTicker(ticker) {
+  if (ticker && ticker !== 'Lainnya') {
+    investmentStore.searchQuery = ticker
+  }
+  router.push('/investments')
 }
 
 onMounted(() => {
@@ -135,9 +146,9 @@ onMounted(() => {
 
       <!-- Baris 4: Ringkasan Investasi & Portofolio Saham -->
       <section
-        class="relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl p-5 bg-gradient-to-br from-[#d3e4d8]/40 via-white to-white dark:from-[#2d5a3f]/30 dark:via-zinc-900 dark:to-zinc-900 border border-[#144229]/20 dark:border-[#a1d2af]/25 shadow-surface"
+        class="relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl p-5 bg-gradient-to-br from-[#d3e4d8]/40 via-white to-white dark:from-[#2d5a3f]/30 dark:via-zinc-900 dark:to-zinc-900 border border-[#144229]/20 dark:border-[#a1d2af]/25 shadow-surface"
       >
-        <div class="flex items-start gap-4">
+        <div class="flex items-start gap-4 min-w-0">
           <span class="w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center bg-[#144229] text-white dark:bg-[#a1d2af] dark:text-[#002110] shadow-surface">
             <GraphUp class="w-6 h-6 stroke-[2]" />
           </span>
@@ -185,9 +196,20 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- Donut Proporsi Saham Mini -->
+        <div class="py-2 md:py-0 md:px-4 md:border-x border-slate-200/80 dark:border-zinc-800">
+          <StockAllocationChart
+            compact
+            :stocks="investmentStore.stocks"
+            :total-market-value="investmentStore.summary.stock_market_value"
+            :is-masked="investmentStore.isBalanceMasked"
+            @select-ticker="goToInvestmentsWithTicker"
+          />
+        </div>
+
         <RouterLink
           to="/investments"
-          class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-[#144229] text-white dark:bg-[#a1d2af] dark:text-[#002110] hover:bg-[#2d5a3f] transition-all cursor-pointer shadow-xs self-start sm:self-auto shrink-0"
+          class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-[#144229] text-white dark:bg-[#a1d2af] dark:text-[#002110] hover:bg-[#2d5a3f] transition-all cursor-pointer shadow-xs self-start md:self-auto shrink-0"
         >
           <span>Kelola Portofolio</span>
           <ArrowRight class="w-3.5 h-3.5" />

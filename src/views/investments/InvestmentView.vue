@@ -10,6 +10,7 @@ import BaseBadge from '@/components/ui/BaseBadge.vue'
 import StockAvatar from '@/components/ui/StockAvatar.vue'
 import PrimaryButton from '@/components/ui/PrimaryButton.vue'
 import InvestmentSummaryHeader from '@/components/modules/investments/InvestmentSummaryHeader.vue'
+import StockAllocationChart from '@/components/modules/investments/StockAllocationChart.vue'
 import InvestmentStockCard from '@/components/modules/investments/InvestmentStockCard.vue'
 import InvestmentEditLotSheet from '@/components/modules/investments/InvestmentEditLotSheet.vue'
 import InvestmentClosePositionSheet from '@/components/modules/investments/InvestmentClosePositionSheet.vue'
@@ -84,6 +85,13 @@ async function handleConfirmCashAdjustment(payload) {
   await investmentStore.submitCashAdjustment(payload)
 }
 
+function handleSelectTickerFromChart(ticker) {
+  if (!ticker || ticker === 'Lainnya') return
+  investmentStore.activeTab = 'holdings'
+  investmentStore.searchQuery = ticker
+  searchOpen.value = true
+}
+
 onMounted(() => {
   investmentStore.fetchPortfolio(false)
 })
@@ -100,13 +108,27 @@ onMounted(() => {
         </BaseText>
       </div>
 
-      <!-- Ringkasan: hero + cash (Beli Saham via tombol + global di AppShell) -->
-      <InvestmentSummaryHeader
-        :summary="investmentStore.summary"
-        :is-masked="investmentStore.isBalanceMasked"
-        @toggle-privacy="investmentStore.toggleBalanceMask()"
-        @open-cash="(mode) => investmentStore.openCashSheet(mode)"
-      />
+      <!-- Ringkasan & Proporsi Saham (Desktop: Berdampingan, Mobile: Stacked) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4 items-stretch">
+        <div class="lg:col-span-7 flex flex-col justify-between">
+          <InvestmentSummaryHeader
+            :summary="investmentStore.summary"
+            :is-masked="investmentStore.isBalanceMasked"
+            @toggle-privacy="investmentStore.toggleBalanceMask()"
+            @open-cash="(mode) => investmentStore.openCashSheet(mode)"
+          />
+        </div>
+        <div class="lg:col-span-5 flex">
+          <StockAllocationChart
+            class="flex-1"
+            :stocks="investmentStore.stocks"
+            :total-market-value="investmentStore.summary.stock_market_value"
+            :is-masked="investmentStore.isBalanceMasked"
+            @select-ticker="handleSelectTickerFromChart"
+            @buy="investmentStore.openBuySheet()"
+          />
+        </div>
+      </div>
 
       <!-- Toolbar: Tab + Cari + Refresh -->
       <div class="flex items-center gap-2">
