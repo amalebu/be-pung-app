@@ -371,6 +371,29 @@
   transform: translateY(16px);
 }
 
+/* 7. Page / Module Transition: Coming from Left (Setiap Pindah Menu) */
+.page-left-enter-active,
+.slide-left-enter-active {
+  transition: all 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.page-left-leave-active,
+.slide-left-leave-active {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.page-left-enter-from,
+.slide-left-enter-from {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+
+.page-left-leave-to,
+.slide-left-leave-to {
+  opacity: 0;
+  transform: translateX(24px);
+}
+
 /* ==========================================================================
    Reusable UI Interactive & Animation Utility Classes
    ========================================================================== */
@@ -488,6 +511,10 @@
   .slide-fade-leave-active,
   .slide-up-enter-active,
   .slide-up-leave-active,
+  .page-left-enter-active,
+  .page-left-leave-active,
+  .slide-left-enter-active,
+  .slide-left-leave-active,
   .animate-data-update,
   .animate-check-pop,
   .animate-pop-in,

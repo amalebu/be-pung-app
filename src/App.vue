@@ -21,10 +21,10 @@ onMounted(() => {
   <IconoirProvider>
     <PwaInstallPrompt />
     <NetworkStatusToast />
-    <div class="min-h-screen bg-surface dark:bg-zinc-950 text-on-surface dark:text-zinc-100 antialiased">
-      <router-view v-slot="{ Component }">
-        <Transition name="fade" mode="out-in">
-          <component :is="Component" />
+    <div class="min-h-screen bg-surface dark:bg-zinc-950 text-on-surface dark:text-zinc-100 antialiased overflow-x-hidden">
+      <router-view v-slot="{ Component, route }">
+        <Transition name="page-left" mode="out-in">
+          <component :is="Component" :key="route.name" />
         </Transition>
       </router-view>
     </div>
