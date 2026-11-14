@@ -1,11 +1,9 @@
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { User, Settings, Lock, LogOut, Xmark, NavArrowRight, ShieldCheck } from '@iconoir/vue'
+import { Settings, Lock, LogOut, Xmark, NavArrowRight } from '@iconoir/vue'
 import DefaultAvatar from '@/components/ui/DefaultAvatar.vue'
 import ThemeToggle from '@/components/layout/ThemeToggle.vue'
-import BaseHeading from '@/components/ui/BaseHeading.vue'
-import BaseText from '@/components/ui/BaseText.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { mainNavItems } from '@/config/navigation'
 import { formatPhoneDisplay } from '@/utils/phoneUtils'
@@ -26,6 +24,18 @@ const authStore = useAuthStore()
 const touchStartX = ref(0)
 const touchStartY = ref(0)
 const isSwiping = ref(false)
+
+// Hanya tampilkan menu yang benar-benar bisa dibuka (sembunyikan placeholder "Segera")
+const drawerNavItems = mainNavItems.filter((item) => !item.badge)
+
+const userContact = computed(() => {
+  if (authStore.user?.phone) return formatPhoneDisplay(authStore.user.phone)
+  return authStore.user?.email || ''
+})
+
+function isActive(path) {
+  return route.path === path || route.path.startsWith(path + '/')
+}
 
 function close() {
   emit('close')
@@ -127,170 +137,104 @@ onUnmounted(() => {
 
         <!-- Drawer Panel (Left-sliding panel) -->
         <aside
-          class="drawer-panel fixed inset-y-0 left-0 w-72 max-w-[82vw] bg-white dark:bg-zinc-900 border-r border-slate-200/90 dark:border-zinc-800 shadow-2xl flex flex-col z-10 will-change-transform"
+          class="drawer-panel fixed inset-y-0 left-0 w-72 max-w-[82vw] bg-white dark:bg-zinc-900 shadow-2xl flex flex-col z-10 will-change-transform pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]"
           @click.stop
         >
-          <!-- Drawer Header / User Banner -->
-          <div class="p-5 border-b border-slate-200/80 dark:border-zinc-800 bg-slate-50/60 dark:bg-zinc-800/40">
-            <div class="flex items-center justify-between mb-4">
-              <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 text-xs font-semibold">
-                <ShieldCheck class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>Akun Terverifikasi</span>
-              </div>
-
-              <!-- Close Button (X) -->
-              <button
-                type="button"
-                @click.stop="close"
-                class="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-slate-200/60 dark:hover:bg-zinc-700/60 transition-colors cursor-pointer"
-                title="Tutup Menu"
-              >
-                <Xmark class="w-5 h-5" />
-              </button>
-            </div>
-
-            <!-- User Profile Card in Drawer (Clickable to /profile) -->
-            <div
+          <!-- Header: Profil (tap untuk buka /profile) + tombol tutup -->
+          <div class="flex items-center gap-3 px-4 pt-5 pb-4">
+            <button
+              type="button"
               @click="navigateTo('/profile')"
-              class="flex items-center gap-3 p-2 -mx-2 rounded-xl hover:bg-slate-200/40 dark:hover:bg-zinc-800/60 transition-colors cursor-pointer group"
+              class="flex-1 min-w-0 flex items-center gap-3 p-1.5 -m-1.5 rounded-2xl text-left hover:bg-slate-100 dark:hover:bg-zinc-800/70 active:scale-[0.98] transition-all cursor-pointer"
+              :class="{ 'bg-slate-100 dark:bg-zinc-800/70': isActive('/profile') }"
             >
               <DefaultAvatar
                 :avatar-url="authStore.user?.avatar"
                 :name="authStore.user?.name || 'Pengguna'"
-                size="lg"
+                size="md"
               />
-
               <div class="min-w-0 flex-1">
-                <BaseHeading as="h2" size="sm" weight="semibold" class="truncate group-hover:text-emerald-700 dark:group-hover:text-lime-400 transition-colors">
+                <p class="text-sm font-bold text-slate-900 dark:text-zinc-100 truncate leading-tight">
                   {{ authStore.user?.name || 'Pengguna' }}
-                </BaseHeading>
-                <BaseText size="xs" variant="muted" class="truncate font-mono">
-                  {{ authStore.user?.phone ? formatPhoneDisplay(authStore.user.phone) : (authStore.user?.email || 'Belum ada kontak') }}
-                </BaseText>
-                <span class="inline-block text-[11px] text-emerald-600 dark:text-lime-400 font-medium mt-0.5">
-                  Lihat Profil &rarr;
-                </span>
+                </p>
+                <p v-if="userContact" class="text-xs text-slate-500 dark:text-zinc-400 truncate tabular-nums mt-0.5">
+                  {{ userContact }}
+                </p>
               </div>
-            </div>
-          </div>
-
-          <!-- Drawer Navigation List -->
-          <nav class="flex-1 overflow-y-auto p-4 space-y-2">
-            <!-- Main Apps Navigation (Sama seperti Desktop) -->
-            <BaseText size="xs" variant="muted" class="px-2 uppercase tracking-wider font-semibold">
-              Menu Utama
-            </BaseText>
-
-            <div class="space-y-1 mb-4">
-              <button
-                v-for="item in mainNavItems"
-                :key="item.name"
-                type="button"
-                @click="navigateTo(item.path)"
-                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer"
-                :class="route.path === item.path
-                  ? 'bg-[#144229] text-white dark:bg-[#a1d2af] dark:text-[#002110] shadow-[0px_4px_16px_rgba(20,66,41,0.18)]'
-                  : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/60'"
-              >
-                <div class="flex items-center gap-3">
-                  <component :is="item.icon" class="w-5 h-5 shrink-0" />
-                  <span>{{ item.name }}</span>
-                </div>
-
-                <span
-                  v-if="item.badge"
-                  class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full"
-                  :class="route.path === item.path
-                    ? 'bg-white/20 text-white'
-                    : 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300'"
-                >
-                  {{ item.badge }}
-                </span>
-              </button>
-            </div>
-
-            <div class="my-3 border-t border-slate-200/80 dark:border-zinc-800" />
-
-            <BaseText size="xs" variant="muted" class="px-2 uppercase tracking-wider font-semibold">
-              Navigasi Akun
-            </BaseText>
-
-            <!-- Menu Profile -->
-            <button
-              type="button"
-              @click="navigateTo('/profile')"
-              class="w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800/70 transition-colors cursor-pointer"
-            >
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
-                  <User class="w-5 h-5" />
-                </div>
-                <div class="text-left">
-                  <p class="text-sm font-semibold">Profil Saya</p>
-                  <p class="text-xs text-slate-500 dark:text-zinc-400">Nama, foto & tautkan akun</p>
-                </div>
-              </div>
-              <NavArrowRight class="w-4 h-4 text-slate-400" />
+              <NavArrowRight class="w-4 h-4 text-slate-400 dark:text-zinc-500 shrink-0" />
             </button>
 
-            <!-- Menu Settings -->
+            <button
+              type="button"
+              @click.stop="close"
+              class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              aria-label="Tutup menu"
+            >
+              <Xmark class="w-5 h-5" />
+            </button>
+          </div>
+
+          <div class="mx-4 h-px bg-slate-200/80 dark:bg-zinc-800" />
+
+          <!-- Navigasi Utama -->
+          <nav class="flex-1 overflow-y-auto px-3 py-3 space-y-1 custom-scrollbar">
+            <button
+              v-for="item in drawerNavItems"
+              :key="item.name"
+              type="button"
+              @click="navigateTo(item.path)"
+              class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-semibold transition-all cursor-pointer active:scale-[0.98]"
+              :class="isActive(item.path)
+                ? 'bg-[#144229] text-white dark:bg-[#a1d2af] dark:text-[#002110] shadow-[0px_4px_16px_rgba(20,66,41,0.18)]'
+                : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/60'"
+              :aria-current="isActive(item.path) ? 'page' : undefined"
+            >
+              <component
+                :is="item.icon"
+                class="w-5 h-5 shrink-0"
+                :class="isActive(item.path) ? 'stroke-[2.2]' : 'stroke-[1.8]'"
+              />
+              <span class="truncate">{{ item.name }}</span>
+            </button>
+
+            <div class="!my-3 mx-1 h-px bg-slate-200/80 dark:bg-zinc-800" />
+
             <button
               type="button"
               @click="navigateTo('/settings')"
-              class="w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800/70 transition-colors cursor-pointer"
+              class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-semibold transition-all cursor-pointer active:scale-[0.98]"
+              :class="isActive('/settings')
+                ? 'bg-[#144229] text-white dark:bg-[#a1d2af] dark:text-[#002110] shadow-[0px_4px_16px_rgba(20,66,41,0.18)]'
+                : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/60'"
             >
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-400 flex items-center justify-center">
-                  <Settings class="w-5 h-5" />
-                </div>
-                <div class="text-left">
-                  <p class="text-sm font-semibold">Pengaturan</p>
-                  <p class="text-xs text-slate-500 dark:text-zinc-400">Preferensi & keamanan</p>
-                </div>
-              </div>
-              <NavArrowRight class="w-4 h-4 text-slate-400" />
+              <Settings class="w-5 h-5 shrink-0 stroke-[1.8]" />
+              <span>Pengaturan</span>
             </button>
+          </nav>
 
-            <div class="my-3 border-t border-slate-200/80 dark:border-zinc-800" />
+          <!-- Footer: Aksi cepat (Tema, Kunci PIN, Keluar) -->
+          <div class="px-4 py-4 border-t border-slate-200/80 dark:border-zinc-800 flex items-center gap-2">
+            <ThemeToggle />
 
-            <BaseText size="xs" variant="muted" class="px-2 uppercase tracking-wider font-semibold">
-              Preferensi Tampilan
-            </BaseText>
-
-            <!-- Relocated Theme Toggle for Mobile -->
-            <ThemeToggle show-side-nav />
-
-            <!-- Lock Screen with PIN -->
             <button
               v-if="authStore.user?.has_pin"
               type="button"
               @click="handleLockNow"
-              class="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/70 transition-colors cursor-pointer mt-2"
+              class="w-10 h-10 shrink-0 rounded-full border border-[#e2e2e5] dark:border-zinc-800 bg-white/90 dark:bg-zinc-900 flex items-center justify-center text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 transition-all cursor-pointer"
+              aria-label="Kunci layar dengan PIN"
+              title="Kunci Layar"
             >
-              <div class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                <Lock class="w-5 h-5" />
-              </div>
-              <div class="text-left">
-                <p class="text-sm font-semibold">Kunci Layar Sekarang</p>
-                <p class="text-xs text-slate-500 dark:text-zinc-400">Kunci instan dengan PIN</p>
-              </div>
+              <Lock class="w-5 h-5" />
             </button>
-          </nav>
 
-          <!-- Drawer Footer / Logout -->
-          <div class="p-4 border-t border-slate-200/80 dark:border-zinc-800 bg-slate-50/40 dark:bg-zinc-800/20">
             <button
               type="button"
               @click="handleLogout"
-              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer border border-rose-200/60 dark:border-rose-900/40"
+              class="ml-auto h-10 inline-flex items-center gap-2 px-4 rounded-full text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 active:scale-95 transition-all cursor-pointer"
             >
               <LogOut class="w-4 h-4" />
-              <span>Keluar dari Akun</span>
+              <span>Keluar</span>
             </button>
-
-            <p class="text-center text-[10px] text-slate-400 dark:text-zinc-600 mt-3 font-mono">
-              PersonalApp v1.0 &bull; Modular SQLite
-            </p>
           </div>
         </aside>
       </div>

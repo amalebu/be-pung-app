@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { localDb } from '@/services/localDb'
 import { todoService } from '@/services/todoService'
 import { habitService } from '@/services/habitService'
@@ -12,9 +12,35 @@ export const useNetworkStore = defineStore('network', () => {
   const pendingCount = ref(0)
   const backOnlineSubtext = ref('Semua data telah disinkronkan')
 
+  // Top Toast Banner state (muncul di atas header & hilang dalam 1 detik)
+  const topToast = ref({
+    show: false,
+    type: null, // 'offline' | 'online'
+    message: '',
+  })
+
+  // Status koneksi terpadu untuk dot foto profil: 'offline' (merah), 'pending' (kuning/orange), 'online' (hijau)
+  const connectionStatus = computed(() => {
+    if (!isOnline.value) return 'offline'
+    if (isSyncing.value || pendingCount.value > 0) return 'pending'
+    return 'online'
+  })
+
   let toastTimer = null
   let heartbeatTimer = null
   const syncCompleteHandlers = new Set()
+
+  function showBanner(type, message) {
+    if (toastTimer) clearTimeout(toastTimer)
+    topToast.value = {
+      show: true,
+      type,
+      message,
+    }
+    toastTimer = setTimeout(() => {
+      topToast.value.show = false
+    }, 1000) // Otomatis hilang dalam 1 detik
+  }
 
   function onSyncCompleted(callback) {
     syncCompleteHandlers.add(callback)
@@ -35,13 +61,15 @@ export const useNetworkStore = defineStore('network', () => {
   }
 
   function markOffline() {
-    if (toastTimer) {
-      clearTimeout(toastTimer)
-      toastTimer = null
-    }
+    const wasOnline = isOnline.value
     isOnline.value = false
     wasOffline.value = true
     showBackOnlineToast.value = false
+
+    // Tampilkan banner offline 1 detik saat koneksi terputus
+    if (wasOnline) {
+      showBanner('offline', 'Anda sedang Offline')
+    }
   }
 
   async function markOnline({ forceToast = false } = {}) {
@@ -52,7 +80,7 @@ export const useNetworkStore = defineStore('network', () => {
 
     if (previouslyOffline || forceToast) {
       wasOffline.value = false
-      showBackOnlineToast.value = true
+      showBanner('online', 'Anda kembali Online')
 
       if (pendingCount.value > 0) {
         backOnlineSubtext.value = `Menyinkronkan ${pendingCount.value} perubahan lokal...`
@@ -61,11 +89,6 @@ export const useNetworkStore = defineStore('network', () => {
         backOnlineSubtext.value = 'Koneksi pulih • Data telah mutakhir'
         await notifySyncCompleted()
       }
-
-      if (toastTimer) clearTimeout(toastTimer)
-      toastTimer = setTimeout(() => {
-        showBackOnlineToast.value = false
-      }, 3500)
     } else if (pendingCount.value > 0 && !isSyncing.value) {
       await syncPendingQueue()
     }
@@ -315,6 +338,8 @@ export const useNetworkStore = defineStore('network', () => {
     isOnline,
     wasOffline,
     showBackOnlineToast,
+    topToast,
+    connectionStatus,
     isSyncing,
     pendingCount,
     backOnlineSubtext,

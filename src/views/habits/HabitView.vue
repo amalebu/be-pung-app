@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
 import { Plus, Spark, ShieldAlert, Search, Xmark } from '@iconoir/vue'
-import AppShell from '@/components/layout/AppShell.vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
@@ -64,7 +63,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppShell>
+  <div>
     <div class="space-y-3.5 md:space-y-5">
       <!-- Page Header: ringkas di mobile, lengkap di desktop -->
       <div class="flex items-center justify-between gap-3">
@@ -221,5 +220,5 @@ onMounted(() => {
       @close="habitStore.closeLogDaySheet()"
       @save="handleSaveDayLog"
     />
-  </AppShell>
+  </div>
 </template>

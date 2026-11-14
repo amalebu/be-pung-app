@@ -7,6 +7,9 @@ import BaseAlert from '@/components/ui/BaseAlert.vue'
 import StockAvatar from '@/components/ui/StockAvatar.vue'
 import { formatRupiah, formatSharePrice, formatPercent, calculateDefaultSellFee } from '@/utils/currencyUtils'
 import { getJakartaTodayStr } from '@/utils/dateUtils'
+import { useInvestmentStore } from '@/stores/investmentStore'
+
+const investmentStore = useInvestmentStore()
 
 const props = defineProps({
   show: {
@@ -54,6 +57,9 @@ const soldShares = computed(() => Math.max(0, Number(soldLots.value || 0)) * 100
 const costBasisEstimate = computed(() => soldShares.value * referenceBuyPrice.value)
 const grossProceeds = computed(() => soldShares.value * Math.max(0, Number(sellPrice.value || 0)))
 const netProceeds = computed(() => grossProceeds.value - Math.max(0, Number(sellFee.value || 0)))
+const isFeeMateraiApplied = computed(() => {
+  return investmentStore.willTriggerDailyStampDuty(soldAt.value, grossProceeds.value)
+})
 const estimatedPl = computed(() => netProceeds.value - costBasisEstimate.value)
 const estimatedPlPercent = computed(() =>
   costBasisEstimate.value > 0 ? (estimatedPl.value / costBasisEstimate.value) * 100 : 0
@@ -223,6 +229,16 @@ function handleSubmit() {
             <span class="text-[10px] font-normal text-slate-400">
               {{ isFeeManuallyEdited ? '(manual)' : '(0.2513%)' }}
             </span>
+          </span>
+        </div>
+
+        <div
+          v-if="isFeeMateraiApplied"
+          class="flex items-center justify-between"
+        >
+          <span class="text-slate-500">Fee Materai:</span>
+          <span class="font-bold tabular-nums text-slate-800 dark:text-zinc-200">
+            Rp 10.000
           </span>
         </div>
 

@@ -7,6 +7,9 @@ import SecondaryButton from '@/components/ui/SecondaryButton.vue'
 import BaseAlert from '@/components/ui/BaseAlert.vue'
 import StockAvatar from '@/components/ui/StockAvatar.vue'
 import { formatRupiah, formatSharePrice, calculateDefaultBuyFee } from '@/utils/currencyUtils'
+import { useInvestmentStore } from '@/stores/investmentStore'
+
+const investmentStore = useInvestmentStore()
 
 const props = defineProps({
   show: {
@@ -49,9 +52,11 @@ watch(
 )
 
 const totalShares = computed(() => Math.max(0, Number(lots.value || 0)) * 100)
-const totalCost = computed(
-  () => totalShares.value * Math.max(0, Number(buyPrice.value || 0)) + Math.max(0, Number(buyFee.value || 0))
-)
+const grossCost = computed(() => totalShares.value * Math.max(0, Number(buyPrice.value || 0)))
+const totalCost = computed(() => grossCost.value + Math.max(0, Number(buyFee.value || 0)))
+const isFeeMateraiApplied = computed(() => {
+  return investmentStore.willTriggerDailyStampDuty(openedAt.value, grossCost.value, props.lot?.id)
+})
 
 function handleSubmit() {
   if (!props.lot) return
@@ -167,13 +172,34 @@ function handleDelete() {
         </div>
       </div>
 
-      <div class="p-3.5 rounded-2xl bg-[#f3f3f6] dark:bg-zinc-800/60 border border-[#e2e2e5] dark:border-zinc-700 flex items-center justify-between text-xs">
-        <span class="text-slate-600 dark:text-zinc-400">
-          Total Modal Baris Ini ({{ lots }} Lot × Rp {{ formatSharePrice(buyPrice) }}):
-        </span>
-        <span class="text-sm font-extrabold tabular-nums text-slate-900 dark:text-zinc-100">
-          {{ formatRupiah(totalCost) }}
-        </span>
+      <div class="p-3.5 rounded-2xl bg-[#f3f3f6] dark:bg-zinc-800/60 border border-[#e2e2e5] dark:border-zinc-700 space-y-1.5 text-xs">
+        <div class="flex items-center justify-between text-slate-600 dark:text-zinc-400">
+          <span>Nilai Pokok ({{ lots }} Lot × Rp {{ formatSharePrice(buyPrice) }}):</span>
+          <span class="font-bold tabular-nums text-slate-800 dark:text-zinc-200">
+            {{ formatRupiah(grossCost) }}
+          </span>
+        </div>
+        <div class="flex items-center justify-between text-slate-600 dark:text-zinc-400">
+          <span>Komisi Broker:</span>
+          <span class="font-bold tabular-nums text-slate-800 dark:text-zinc-200">
+            {{ formatRupiah(buyFee) }}
+          </span>
+        </div>
+        <div
+          v-if="isFeeMateraiApplied"
+          class="flex items-center justify-between text-slate-600 dark:text-zinc-400"
+        >
+          <span>Fee Materai:</span>
+          <span class="font-bold tabular-nums text-slate-800 dark:text-zinc-200">
+            Rp 10.000
+          </span>
+        </div>
+        <div class="flex items-center justify-between pt-1.5 border-t border-slate-200 dark:border-zinc-700">
+          <span class="font-bold text-slate-700 dark:text-zinc-300">Total Modal Baris Ini:</span>
+          <span class="text-sm font-extrabold tabular-nums text-slate-900 dark:text-zinc-100">
+            {{ formatRupiah(totalCost) }}
+          </span>
+        </div>
       </div>
 
       <div class="flex items-center justify-between gap-2 pt-2">

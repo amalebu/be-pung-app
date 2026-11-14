@@ -8,7 +8,9 @@ const SESSION_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000 // 1 Minggu (7 Hari)
 const PIN_LOCK_TIMEOUT_MS = 5 * 60 * 1000 // 5 Menit
 
 async function computePinHash(pin, userId = '') {
-  const raw = `personal_app_pin:${userId}:${pin}`
+  const cleanUserId = userId ? String(userId).trim() : ''
+  const cleanPin = pin ? String(pin).trim() : ''
+  const raw = `personal_app_pin:${cleanUserId}:${cleanPin}`
   if (typeof crypto !== 'undefined' && crypto.subtle) {
     const msgBuffer = new TextEncoder().encode(raw)
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer)
@@ -50,20 +52,9 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function lockApp() {
+  function lockApp() {
     if (isAuthenticated.value && user.value?.has_pin) {
       setPinLocked(true)
-      try {
-        const { default: router } = await import('@/router')
-        if (router.currentRoute.value.name !== 'verify-pin') {
-          router.push({
-            name: 'verify-pin',
-            query: { redirect: router.currentRoute.value.fullPath },
-          })
-        }
-      } catch {
-        // Fallback handled by navigation guard
-      }
     }
   }
 
@@ -110,7 +101,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function saveLocalPinHash(pin, userId) {
     if (!pin) return
-    const hashed = await computePinHash(pin, userId ?? user.value?.id ?? '')
+    const currentId = userId ?? user.value?.id ?? ''
+    const hashed = await computePinHash(pin, currentId)
     localStorage.setItem('personal_app_pin_hash', hashed)
   }
 
@@ -199,38 +191,78 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     clearErrors()
 
-    // Jika sedang offline, verifikasi langsung terhadap hash PIN lokal (Web Crypto SHA-256)
     const isBrowserOffline = typeof navigator !== 'undefined' && !navigator.onLine
     const savedLocalHash = localStorage.getItem('personal_app_pin_hash')
 
-    if (isBrowserOffline && savedLocalHash) {
-      try {
-        const candidateHash = await computePinHash(pin, user.value?.id ?? '')
-        if (candidateHash === savedLocalHash) {
-          setPinLocked(false)
-          return { success: true, offline: true }
+    // Helper untuk mencocokkan hash kandidat terhadap hash lokal dengan fallback
+    async function matchCandidateHash(inputPin) {
+      if (!savedLocalHash) return false
+      const currentId = user.value?.id ?? ''
+      let candidateHash = await computePinHash(inputPin, currentId)
+      if (candidateHash !== savedLocalHash && currentId) {
+        // Fallback jika hash sebelumnya disimpan tanpa userId
+        const fallbackHash = await computePinHash(inputPin, '')
+        if (fallbackHash === savedLocalHash) {
+          candidateHash = fallbackHash
         }
-        errorMessage.value = 'PIN yang dimasukkan salah.'
+      }
+      return candidateHash === savedLocalHash
+    }
+
+    // 1. Jika browser sudah terdeteksi offline secara hardware/jaringan
+    if (isBrowserOffline) {
+      try {
+        if (savedLocalHash) {
+          const isMatch = await matchCandidateHash(pin)
+          if (isMatch) {
+            setPinLocked(false)
+            return { success: true, offline: true }
+          }
+          errorMessage.value = 'PIN yang dimasukkan salah.'
+          return { success: false }
+        }
+
+        errorMessage.value =
+          'Tidak dapat terhubung ke server. Mode offline membutuhkan verifikasi PIN online minimal 1 kali.'
         return { success: false }
       } finally {
         loading.value = false
       }
     }
 
+    // 2. Browser online: Coba verifikasi ke backend terlebih dahulu
     try {
       await authService.verifyPin(pin)
       await saveLocalPinHash(pin, user.value?.id)
       setPinLocked(false)
       return { success: true }
     } catch (err) {
-      // Fallback ke hash lokal jika request gagal karena terputus dari jaringan/server
-      if (!err.response && savedLocalHash) {
-        const candidateHash = await computePinHash(pin, user.value?.id ?? '')
-        if (candidateHash === savedLocalHash) {
-          setPinLocked(false)
-          return { success: true, offline: true }
+      // Deteksi server offline / tidak terjangkau (Network Error, Timeout, 502 Bad Gateway, 503, 504)
+      const isServerOffline =
+        !err.response ||
+        err.code === 'ERR_NETWORK' ||
+        err.code === 'ECONNABORTED' ||
+        err.message === 'Network Error' ||
+        [502, 503, 504].includes(err.response?.status)
+
+      if (isServerOffline) {
+        if (savedLocalHash) {
+          const isMatch = await matchCandidateHash(pin)
+          if (isMatch) {
+            setPinLocked(false)
+            return { success: true, offline: true }
+          }
+          errorMessage.value = 'PIN yang dimasukkan salah.'
+          return { success: false }
         }
+
+        // Backend offline dan belum ada hash PIN lokal
+        errorMessage.value =
+          'Tidak dapat terhubung ke server. Mode offline membutuhkan verifikasi PIN online minimal 1 kali.'
+        return { success: false }
       }
+
+      // Error bisnis dari backend (misal PIN salah HTTP 422)
       const responseData = err.response?.data
       errorMessage.value =
         responseData?.errors?.pin?.[0] ||

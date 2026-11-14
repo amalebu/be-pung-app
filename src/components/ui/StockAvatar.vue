@@ -19,13 +19,16 @@ const props = defineProps({
 const hasError = ref(false)
 const isLoaded = ref(false)
 
-const cleanTicker = computed(() =>
-  String(props.ticker || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '')
-)
+const cleanTicker = computed(() => {
+  const raw = String(props.ticker || '').trim().toUpperCase()
+  // Buang suffix .JK jika ada (contoh: BBRI.JK -> BBRI)
+  const stripped = raw.replace(/\.JK$/i, '').trim()
+  return stripped.replace(/[^A-Z0-9]/g, '')
+})
 
 const iconUrl = computed(() => {
   if (!cleanTicker.value) return ''
-  return `https://filemanager.inasekuritas.com/icons/${cleanTicker.value}.png`
+  return `https://assets.stockbit.com/logos/companies/${cleanTicker.value}.png`
 })
 
 const firstLetter = computed(() => {
@@ -73,7 +76,7 @@ const sizeClasses = computed(() => {
     :class="sizeClasses"
     :title="alt || ticker"
   >
-    <!-- 1. Gambar Logo Resmi Ina Sekuritas -->
+    <!-- 1. Gambar Logo Resmi Perusahaan (Stockbit) -->
     <img
       v-if="!hasError && iconUrl"
       :src="iconUrl"
@@ -81,6 +84,7 @@ const sizeClasses = computed(() => {
       class="w-full h-full object-contain rounded-full bg-white p-0.5 border border-slate-200/80 dark:border-zinc-700 shadow-2xs transition-opacity duration-150"
       :class="isLoaded ? 'opacity-100' : 'opacity-0'"
       loading="lazy"
+      referrerpolicy="no-referrer"
       @error="handleError"
       @load="handleLoad"
     />

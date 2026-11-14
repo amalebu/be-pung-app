@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Settings, Shield, HalfMoon, SunLight, Database, Lock, ArrowLeft, CheckCircle, Trash } from '@iconoir/vue'
-import AppShell from '@/components/layout/AppShell.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
@@ -34,8 +33,7 @@ async function handleClearLocalData() {
 </script>
 
 <template>
-  <AppShell>
-    <div class="space-y-4 md:space-y-6 max-w-4xl mx-auto">
+  <div class="space-y-4 md:space-y-6 max-w-4xl mx-auto">
       <!-- Breadcrumb & Header -->
       <div class="flex items-center gap-3">
         <button
@@ -193,6 +191,5 @@ async function handleClearLocalData() {
           Single Backend Laravel API &bull; Vue 3 JS + Vite &bull; Serene Pod Tactile
         </p>
       </div>
-    </div>
-  </AppShell>
+  </div>
 </template>

@@ -1,4 +1,4 @@
-import { ViewGrid, Wallet, GraphUp, Spark, CheckSquare, OpenBook, Calendar, Check, List, CheckCircle } from '@iconoir/vue'
+import { ViewGrid, Wallet, GraphUp, Spark, CheckSquare, OpenBook, Calendar, Check, List, CheckCircle, Camera } from '@iconoir/vue'
 
 export const mainNavItems = [
   {
@@ -29,6 +29,12 @@ export const mainNavItems = [
     name: 'To-Do List',
     path: '/todos',
     icon: CheckSquare,
+    badge: null,
+  },
+  {
+    name: 'PhotoMarker',
+    path: '/photomarker',
+    icon: Camera,
     badge: null,
   },
 ]

@@ -1,8 +1,7 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { RefreshDouble, Search, Xmark, GraphUp, CheckCircle, Wallet } from '@iconoir/vue'
-import AppShell from '@/components/layout/AppShell.vue'
+import { RefreshDouble, Search, Xmark, GraphUp, CheckCircle, Wallet, Trash } from '@iconoir/vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
@@ -15,6 +14,9 @@ import InvestmentStockCard from '@/components/modules/investments/InvestmentStoc
 import InvestmentEditLotSheet from '@/components/modules/investments/InvestmentEditLotSheet.vue'
 import InvestmentClosePositionSheet from '@/components/modules/investments/InvestmentClosePositionSheet.vue'
 import InvestmentCashSheet from '@/components/modules/investments/InvestmentCashSheet.vue'
+import InvestmentSaleSwipeItem from '@/components/modules/investments/InvestmentSaleSwipeItem.vue'
+import InvestmentDeleteSaleModal from '@/components/modules/investments/InvestmentDeleteSaleModal.vue'
+import InvestmentSaleDetailSheet from '@/components/modules/investments/InvestmentSaleDetailSheet.vue'
 import { useInvestmentStore } from '@/stores/investmentStore'
 import {
   formatRupiah,
@@ -36,6 +38,23 @@ const searchOpen = ref(false)
 function closeSearch() {
   investmentStore.searchQuery = ''
   searchOpen.value = false
+}
+
+function formatMutationType(type) {
+  switch (type) {
+    case 'fee': return 'Fee Materai'
+    case 'buy_stock': return 'Beli'
+    case 'sell_stock': return 'Jual'
+    case 'topup': return 'Top-Up'
+    case 'withdraw': return 'Tarik'
+    case 'adjustment': return 'Koreksi'
+    default: return type
+  }
+}
+
+function mutationBadgeVariant(m) {
+  if (m.type === 'fee') return 'amber'
+  return m.amount >= 0 ? 'emerald' : 'rose'
 }
 
 function plColor(val) {
@@ -85,6 +104,59 @@ async function handleConfirmCashAdjustment(payload) {
   await investmentStore.submitCashAdjustment(payload)
 }
 
+const isDeleteSaleModalOpen = ref(false)
+const selectedSaleForDelete = ref(null)
+const isDeletingSale = ref(false)
+const deleteSaleError = ref('')
+
+function openDeleteSaleConfirm(sale) {
+  selectedSaleForDelete.value = sale
+  deleteSaleError.value = ''
+  isDeleteSaleModalOpen.value = true
+}
+
+function closeDeleteSaleConfirm() {
+  if (isDeletingSale.value) return
+  isDeleteSaleModalOpen.value = false
+  selectedSaleForDelete.value = null
+  deleteSaleError.value = ''
+}
+
+const isSaleDetailSheetOpen = ref(false)
+const selectedSaleForDetail = ref(null)
+
+function openSaleDetail(sale) {
+  selectedSaleForDetail.value = sale
+  isSaleDetailSheetOpen.value = true
+}
+
+function closeSaleDetail() {
+  isSaleDetailSheetOpen.value = false
+  selectedSaleForDetail.value = null
+}
+
+function handleDeleteFromDetail(sale) {
+  closeSaleDetail()
+  openDeleteSaleConfirm(sale)
+}
+
+async function handleConfirmDeleteSale(saleId) {
+  isDeletingSale.value = true
+  deleteSaleError.value = ''
+  try {
+    const res = await investmentStore.submitDeleteSale(saleId)
+    if (res?.success) {
+      closeDeleteSaleConfirm()
+    } else {
+      deleteSaleError.value = res?.message || 'Gagal membatalkan transaksi penjualan.'
+    }
+  } catch (err) {
+    deleteSaleError.value = err?.message || 'Terjadi kesalahan sistem.'
+  } finally {
+    isDeletingSale.value = false
+  }
+}
+
 function handleSelectTickerFromChart(ticker) {
   if (!ticker || ticker === 'Lainnya') return
   investmentStore.activeTab = 'holdings'
@@ -98,7 +170,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppShell>
+  <div>
     <div class="space-y-3.5 md:space-y-5">
       <!-- Judul: hanya desktop -->
       <div class="hidden md:block">
@@ -275,30 +347,13 @@ onMounted(() => {
             name="fade"
             class="divide-y divide-slate-200/70 dark:divide-zinc-800"
           >
-            <div
+            <InvestmentSaleSwipeItem
               v-for="sale in investmentStore.sales"
               :key="sale.id"
-              class="flex items-center gap-3 px-3.5 py-3"
-            >
-              <StockAvatar :ticker="sale.ticker" :alt="sale.company_name" size="md" class="shrink-0" />
-              <div class="min-w-0 flex-1 text-xs tabular-nums">
-                <div class="font-extrabold text-sm text-[#144229] dark:text-[#a1d2af]">
-                  {{ sale.ticker }}
-                  <span class="font-bold text-slate-700 dark:text-zinc-200 text-xs">· {{ sale.sold_lots }} Lot</span>
-                </div>
-                <div class="text-[11px] text-slate-500 dark:text-zinc-400">
-                  {{ sale.sold_at }} · {{ formatSharePrice(sale.buy_avg_price) }} → {{ formatSharePrice(sale.sell_price) }}
-                </div>
-              </div>
-              <div class="text-right text-xs tabular-nums shrink-0">
-                <div class="font-extrabold" :class="plColor(sale.realized_pl)">
-                  {{ formatRupiah(sale.realized_pl, { withSign: true }) }}
-                </div>
-                <div class="text-[11px] font-semibold" :class="plColor(sale.realized_pl)">
-                  {{ formatPercent(sale.realized_pl_percent) }}
-                </div>
-              </div>
-            </div>
+              :sale="sale"
+              @click="openSaleDetail"
+              @delete="openDeleteSaleConfirm"
+            />
           </TransitionGroup>
         </BaseCard>
 
@@ -318,6 +373,7 @@ onMounted(() => {
                 <th class="py-3 px-4 text-right">Harga Jual</th>
                 <th class="py-3 px-4 text-right">Hasil Bersih</th>
                 <th class="py-3 px-4 text-right">Realized P/L</th>
+                <th class="py-3 px-4 text-center w-16">Aksi</th>
               </tr>
             </thead>
             <TransitionGroup
@@ -325,7 +381,12 @@ onMounted(() => {
               name="fade"
               class="divide-y divide-slate-200/70 dark:divide-zinc-800 text-xs tabular-nums"
             >
-              <tr v-for="sale in investmentStore.sales" :key="sale.id">
+              <tr
+                v-for="sale in investmentStore.sales"
+                :key="sale.id"
+                @click="openSaleDetail(sale)"
+                class="hover:bg-slate-50/80 dark:hover:bg-zinc-800/40 cursor-pointer transition-colors"
+              >
                 <td class="py-3 px-4 text-slate-600 dark:text-zinc-300">{{ sale.sold_at }}</td>
                 <td class="py-3 px-4">
                   <div class="flex items-center gap-2.5">
@@ -341,6 +402,16 @@ onMounted(() => {
                 <td class="py-3 px-4 text-right font-extrabold" :class="plColor(sale.realized_pl)">
                   {{ formatRupiah(sale.realized_pl, { withSign: true }) }} ({{ formatPercent(sale.realized_pl_percent) }})
                 </td>
+                <td class="py-3 px-4 text-center">
+                  <button
+                    type="button"
+                    @click.stop="openDeleteSaleConfirm(sale)"
+                    title="Batalkan Penjualan"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                  >
+                    <Trash class="w-4 h-4" />
+                  </button>
+                </td>
               </tr>
             </TransitionGroup>
           </table>
@@ -349,7 +420,7 @@ onMounted(() => {
 
       <!-- ================= TAB: MUTASI CASH ================= -->
       <template v-else>
-        <div
+<div
           v-if="investmentStore.loading && (!investmentStore.cash.mutations || investmentStore.cash.mutations.length === 0)"
           class="space-y-3"
         >
@@ -382,8 +453,8 @@ onMounted(() => {
             >
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2">
-                  <BaseBadge :variant="m.amount >= 0 ? 'emerald' : 'rose'" size="xs">
-                    {{ m.type }}
+                  <BaseBadge :variant="mutationBadgeVariant(m)" size="xs">
+                    {{ formatMutationType(m.type) }}
                   </BaseBadge>
                   <span class="text-[11px] text-slate-500 dark:text-zinc-400 tabular-nums">
                     {{ m.transacted_at }}
@@ -435,7 +506,7 @@ onMounted(() => {
               <tr v-for="m in investmentStore.cash.mutations" :key="m.id">
                 <td class="py-3 px-4 text-slate-600 dark:text-zinc-300">{{ m.transacted_at }}</td>
                 <td class="py-3 px-4">
-                  <BaseBadge :variant="m.amount >= 0 ? 'emerald' : 'rose'" size="xs">{{ m.type }}</BaseBadge>
+                  <BaseBadge :variant="mutationBadgeVariant(m)" size="xs">{{ formatMutationType(m.type) }}</BaseBadge>
                 </td>
                 <td class="py-3 px-4 font-medium text-slate-800 dark:text-zinc-200">{{ m.description }}</td>
                 <td class="py-3 px-4 text-right font-extrabold" :class="plColor(m.amount)">
@@ -485,5 +556,23 @@ onMounted(() => {
       @close="investmentStore.closeCashSheet()"
       @submit="handleConfirmCashAdjustment"
     />
-  </AppShell>
+
+    <!-- Modal Konfirmasi: Batalkan Penjualan -->
+    <InvestmentDeleteSaleModal
+      :show="isDeleteSaleModalOpen"
+      :sale="selectedSaleForDelete"
+      :deleting="isDeletingSale"
+      :error-message="deleteSaleError"
+      @close="closeDeleteSaleConfirm"
+      @confirm="handleConfirmDeleteSale"
+    />
+
+    <!-- Bottom Sheet: Rincian Transaksi Penjualan -->
+    <InvestmentSaleDetailSheet
+      :show="isSaleDetailSheetOpen"
+      :sale="selectedSaleForDetail"
+      @close="closeSaleDetail"
+      @delete="handleDeleteFromDetail"
+    />
+  </div>
 </template>

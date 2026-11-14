@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AppSidebar from './AppSidebar.vue'
 import AppHeader from './AppHeader.vue'
@@ -13,13 +13,33 @@ import InvestmentBuySheet from '@/components/modules/investments/InvestmentBuySh
 import { useTodoStore } from '@/stores/todoStore'
 import { useHabitStore } from '@/stores/habitStore'
 import { useInvestmentStore } from '@/stores/investmentStore'
+import { useNetworkStore } from '@/stores/networkStore'
 
 const showQuickActions = ref(false)
 const showMobileDrawer = ref(false)
+const mainScrollRef = ref(null)
+const isScrolled = ref(false)
 const todoStore = useTodoStore()
 const habitStore = useHabitStore()
 const investmentStore = useInvestmentStore()
+const networkStore = useNetworkStore()
 const route = useRoute()
+
+function handleMainScroll(e) {
+  const scrollTop = e.target.scrollTop || 0
+  isScrolled.value = scrollTop > 15
+}
+
+// Reset scroll container posisi ke paling atas setiap berganti rute
+watch(
+  () => route.fullPath,
+  () => {
+    isScrolled.value = false
+    if (mainScrollRef.value) {
+      mainScrollRef.value.scrollTo({ top: 0, behavior: 'instant' })
+    }
+  }
+)
 
 // Edge-swipe dari 1/5 layar sebelah kiri untuk membuka drawer mobile
 const touchStartX = ref(0)
@@ -115,27 +135,42 @@ async function handleHabitFormSubmit(payload) {
 
 <template>
   <div
-    class="min-h-screen flex bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 antialiased"
+    class="h-dvh h-screen flex flex-col overflow-hidden bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 antialiased"
     @touchstart="handleGlobalTouchStart"
     @touchmove="handleGlobalTouchMove"
     @touchend="handleGlobalTouchEnd"
   >
-    <!-- Desktop Sidebar -->
-    <AppSidebar />
-
-    <!-- Mobile Left-Sliding Sidenav Drawer -->
-    <AppMobileDrawer
-      :show="showMobileDrawer"
-      @close="showMobileDrawer = false"
+    <!-- Fixed Top Header (Mounted once, across full top) -->
+    <AppHeader
+      :is-scrolled="isScrolled"
+      @open-mobile-drawer="showMobileDrawer = true"
     />
 
-    <!-- Main Content Stream -->
-      <AppHeader @open-mobile-drawer="showMobileDrawer = true" />
+    <!-- Layout Body: Fixed Sidenav + Scrollable Content Stream -->
+    <div
+      class="flex-1 flex overflow-hidden min-h-0 transition-all duration-300 ease-out"
+      :class="networkStore.topToast.show ? 'pt-[6.5rem] md:pt-[5.25rem]' : 'pt-20 md:pt-14'"
+    >
+      <!-- Desktop Sidebar (Fixed left, fills height under header) -->
+      <AppSidebar />
 
-      <!-- Main Body with Mobile-First Safe Bottom Padding -->
-      <main class="flex-1 p-4 md:p-6 pb-24 md:pb-8 max-w-7xl w-full mx-auto pt-[calc(env(safe-area-inset-top,0px)+5rem)] md:pt-[calc(env(safe-area-inset-top,0px)+5rem)]">
-        <slot />
-      </main>
+      <!-- Mobile Left-Sliding Sidenav Drawer (Swipe gesture preserved) -->
+      <AppMobileDrawer
+        :show="showMobileDrawer"
+        @close="showMobileDrawer = false"
+      />
+
+      <!-- Main Content Stream Container: ONLY THIS SCROLLS -->
+      <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        <main
+          ref="mainScrollRef"
+          @scroll="handleMainScroll"
+          class="flex-1 overflow-y-auto overscroll-contain p-4 md:p-6 pb-28 md:pb-8 max-w-7xl w-full mx-auto custom-scrollbar"
+        >
+          <slot />
+        </main>
+      </div>
+    </div>
 
 
     <!-- Mobile-First Floating Action Button (Quick Add) -->

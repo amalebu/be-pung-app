@@ -23,7 +23,7 @@ export const authService = {
   },
 
   async verifyPin(pin) {
-    const response = await api.post('/auth/pin/verify', { pin })
+    const response = await api.post('/auth/pin/verify', { pin }, { timeout: 3500 })
     return response.data
   },
 

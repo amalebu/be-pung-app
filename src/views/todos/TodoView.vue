@@ -1,7 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { Plus, CheckSquare, Spark } from '@iconoir/vue'
-import AppShell from '@/components/layout/AppShell.vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
@@ -54,8 +53,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppShell>
-    <div class="space-y-3.5 md:space-y-5">
+  <div class="space-y-3.5 md:space-y-5">
       <!-- Page Header: ringkas di mobile (tombol "+" bawah sudah menambah tugas) -->
       <div class="flex items-center justify-between gap-3">
         <div class="min-w-0">
@@ -178,6 +176,5 @@ onMounted(() => {
           @delete-item="handleDeleteSubtask"
         />
       </TransitionGroup>
-    </div>
-  </AppShell>
+  </div>
 </template>

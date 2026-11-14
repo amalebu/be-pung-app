@@ -1,6 +1,7 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useTheme } from '@/composables/useTheme'
+import SidebarTooltip from '@/components/ui/SidebarTooltip.vue'
 
 const props = defineProps({
   showSideNav: {
@@ -14,6 +15,7 @@ const props = defineProps({
 })
 
 const { isDark, toggleTheme } = useTheme()
+const tooltip = ref(null)
 
 // Unique mask ID agar aman jika ada beberapa toggle di halaman yang sama
 const maskId = 'moon-mask-' + Math.random().toString(36).substring(2, 8)
@@ -22,24 +24,38 @@ const themeLabel = computed(() => {
   if (props.label) return props.label
   return isDark.value ? 'Mode Gelap' : 'Mode Terang'
 })
+
+const tooltipText = computed(() => {
+  return isDark.value ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'
+})
+
+function handleToggleTheme() {
+  tooltip.value?.hide()
+  toggleTheme()
+}
 </script>
 
 <template>
   <button
     type="button"
-    @click="toggleTheme()"
-    class="theme-toggle flex items-center transition duration-150 cursor-pointer select-none text-slate-700 dark:text-zinc-200"
+    @click="handleToggleTheme"
+    class="theme-toggle relative flex items-center transition duration-150 cursor-pointer select-none text-slate-700 dark:text-zinc-200"
     :class="[
-      showSideNav !== null
-        ? 'w-full rounded-xl px-3 py-2.5 gap-3 hover:bg-gray-200 dark:hover:bg-gray-900'
-        : 'w-10 h-10 rounded-full border border-[#e2e2e5] dark:border-zinc-800 bg-white/90 dark:bg-zinc-900 justify-center hover:bg-slate-100 dark:hover:bg-zinc-800 shadow-xs',
-      { 'justify-center': showSideNav === false }
+      showSideNav === true
+        ? 'w-full rounded-xl px-2.5 py-2 gap-2.5 hover:bg-slate-100 dark:hover:bg-zinc-800 text-xs font-semibold'
+        : showSideNav === false
+        ? 'w-11 h-11 mx-auto rounded-xl justify-center hover:bg-slate-100 dark:hover:bg-zinc-800'
+        : 'w-10 h-10 rounded-full border border-[#e2e2e5] dark:border-zinc-800 bg-white/90 dark:bg-zinc-900 justify-center hover:bg-slate-100 dark:hover:bg-zinc-800 shadow-xs'
     ]"
-    :title="isDark ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'"
+    :title="showSideNav === false ? undefined : tooltipText"
     aria-label="Ubah tema"
+    @mouseenter="tooltip?.show($event.currentTarget)"
+    @mouseleave="tooltip?.hide()"
+    @focus="tooltip?.show($event.currentTarget)"
+    @blur="tooltip?.hide()"
   >
     <svg
-      class="sun-and-moon w-6 h-6 shrink-0"
+      class="sun-and-moon w-5 h-5 shrink-0"
       aria-hidden="true"
       viewBox="0 0 24 24"
     >
@@ -74,10 +90,14 @@ const themeLabel = computed(() => {
     </svg>
     <span
       v-if="showSideNav"
-      class="text-sm font-medium text-slate-800 dark:text-zinc-200 truncate text-left"
+      class="text-xs font-semibold text-slate-700 dark:text-zinc-300 truncate text-left"
     >
       {{ themeLabel }}
     </span>
+
+    <SidebarTooltip ref="tooltip" :enabled="showSideNav === false">
+      {{ tooltipText }}
+    </SidebarTooltip>
   </button>
 </template>
 

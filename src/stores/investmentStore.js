@@ -162,6 +162,57 @@ export const useInvestmentStore = defineStore('investment', () => {
   }
 
   // API Actions
+  /**
+   * Menghitung total transaksi kotor (Buy + Sale) pada tanggal tertentu
+   * yang sudah ada di portofolio (kecuali lot/sale yang sedang diedit).
+   */
+  function getExistingDailyTurnover(dateStr, excludeLotId = null, excludeSaleId = null) {
+    if (!dateStr) return 0
+    const targetDate = String(dateStr).split('T')[0]
+    let total = 0
+
+    // Akumulasi pembelian (Buy lots)
+    for (const stock of (stocks.value || [])) {
+      for (const lot of (stock.lots || [])) {
+        if (excludeLotId && String(lot.id) === String(excludeLotId)) {
+          continue
+        }
+        const lotDate = String(lot.opened_at || '').split('T')[0]
+        if (lotDate === targetDate) {
+          total += (Number(lot.initial_lots || 0) * 100 * Number(lot.buy_price || 0))
+        }
+      }
+    }
+
+    // Akumulasi penjualan (Sales)
+    for (const sale of (sales.value || [])) {
+      if (excludeSaleId && String(sale.id) === String(excludeSaleId)) {
+        continue
+      }
+      const saleDate = String(sale.sold_at || '').split('T')[0]
+      if (saleDate === targetDate) {
+        total += (Number(sale.sold_lots || 0) * 100 * Number(sale.sell_price || 0))
+      }
+    }
+
+    return total
+  }
+
+  /**
+   * Memeriksa apakah transaksi pada tanggal tertentu dengan nilai kotor baru
+   * akan memicu Fee Materai Rp 10.000 untuk pertama kalinya hari itu.
+   * Return true HANYA jika sebelum transaksi ini turnover <= 10jt DAN setelah ditambah menjadi > 10jt.
+   */
+  function willTriggerDailyStampDuty(dateStr, newGrossTurnover, excludeLotId = null, excludeSaleId = null) {
+    const existing = getExistingDailyTurnover(dateStr, excludeLotId, excludeSaleId)
+    // Jika sebelum transaksi ini sudah > 10jt, fee materai sudah aktif di transaksi sebelumnya -> tidak tampil lagi
+    if (existing > 10000000) {
+      return false
+    }
+    // Jika sebelum <= 10jt dan setelah ditambah transaksi ini menjadi > 10jt -> tampilkan
+    return (existing + Number(newGrossTurnover || 0)) > 10000000
+  }
+
   async function fetchPortfolio(forceRefresh = false) {
     clearErrors()
     const userId = getCurrentUserId()
@@ -333,6 +384,45 @@ export const useInvestmentStore = defineStore('investment', () => {
     }
   }
 
+  async function submitDeleteSale(saleId) {
+    saving.value = true
+    clearErrors()
+    const userId = getCurrentUserId()
+    try {
+      const res = await investmentService.deleteStockSale(saleId)
+      if (res.data) {
+        applyPortfolioPayload(res.data)
+        await localDb.saveCachedPortfolio(userId, res.data)
+      }
+      return { success: true }
+    } catch (err) {
+      errorMessage.value =
+        err.response?.data?.message || 'Gagal membatalkan transaksi penjualan.'
+      return { success: false, message: errorMessage.value }
+    } finally {
+      saving.value = false
+    }
+  }
+
+  async function recalculateFees() {
+    loading.value = true
+    clearErrors()
+    const userId = getCurrentUserId()
+    try {
+      const res = await investmentService.recalculateFees()
+      if (res.data) {
+        applyPortfolioPayload(res.data)
+        await localDb.saveCachedPortfolio(userId, res.data)
+      }
+      return { success: true }
+    } catch (err) {
+      errorMessage.value = err.response?.data?.message || 'Gagal menghitung ulang fee materai.'
+      return { success: false }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     summary,
     cash,
@@ -373,5 +463,9 @@ export const useInvestmentStore = defineStore('investment', () => {
     submitUpdateLot,
     submitDeleteLot,
     submitClosePosition,
+    submitDeleteSale,
+    recalculateFees,
+    getExistingDailyTurnover,
+    willTriggerDailyStampDuty,
   }
 })

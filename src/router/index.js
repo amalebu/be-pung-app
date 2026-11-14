@@ -7,7 +7,7 @@ import HabitView from '@/views/habits/HabitView.vue'
 import InvestmentView from '@/views/investments/InvestmentView.vue'
 import ProfileView from '@/views/profile/ProfileView.vue'
 import SettingsView from '@/views/settings/SettingsView.vue'
-import VerifyPinView from '@/views/auth/VerifyPinView.vue'
+import PhotoMarkerView from '@/views/photos/PhotoMarkerView.vue'
 
 const routes = [
   {
@@ -22,9 +22,7 @@ const routes = [
   },
   {
     path: '/verify-pin',
-    name: 'verify-pin',
-    component: VerifyPinView,
-    meta: { requiresAuth: true, isPinRoute: true },
+    redirect: '/dashboard',
   },
   {
     path: '/register',
@@ -52,6 +50,12 @@ const routes = [
     path: '/habits',
     name: 'habits',
     component: HabitView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/photomarker',
+    name: 'photomarker',
+    component: PhotoMarkerView,
     meta: { requiresAuth: true },
   },
   {
@@ -90,29 +94,6 @@ router.beforeEach((to) => {
 
   // 2. Jika user sudah login dan mengakses halaman guest (seperti /login)
   if (to.meta.guestOnly && authStore.isAuthenticated) {
-    if (authStore.isPinLocked || authStore.needsPinSetup) {
-      return { name: 'verify-pin' }
-    }
-    return { name: 'dashboard' }
-  }
-
-  // 3. Jika user sudah login dan layar terkunci PIN (atau belum setup PIN)
-  if (authStore.isAuthenticated && (authStore.isPinLocked || authStore.needsPinSetup)) {
-    if (to.name === 'verify-pin') {
-      return true
-    }
-    return {
-      name: 'verify-pin',
-      query: { redirect: to.fullPath },
-    }
-  }
-
-  // 4. Jika user sudah login dan TIDAK terkunci, cegah akses manual ke /verify-pin
-  if (authStore.isAuthenticated && !authStore.isPinLocked && !authStore.needsPinSetup && to.name === 'verify-pin') {
-    const target = to.query.redirect
-    if (target && typeof target === 'string' && target.startsWith('/') && target !== '/verify-pin') {
-      return target
-    }
     return { name: 'dashboard' }
   }
 
