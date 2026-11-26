@@ -1,4 +1,18 @@
-import { ViewGrid, Wallet, GraphUp, Spark, CheckSquare, OpenBook, Calendar, Check, List, CheckCircle, Camera } from '@iconoir/vue'
+import {
+  ViewGrid,
+  Wallet,
+  GraphUp,
+  Spark,
+  CheckSquare,
+  OpenBook,
+  Calendar,
+  Check,
+  List,
+  Camera,
+  StatsReport,
+  Settings,
+  Coins,
+} from '@iconoir/vue'
 
 export const mainNavItems = [
   {
@@ -36,6 +50,54 @@ export const mainNavItems = [
     path: '/photomarker',
     icon: Camera,
     badge: null,
+  },
+]
+
+const financeSubnav = [
+  {
+    id: 'finance-summary',
+    name: 'Ringkasan',
+    icon: ViewGrid,
+    path: '/finance',
+  },
+  {
+    id: 'finance-wallets',
+    name: 'Dompet & Kartu',
+    icon: Wallet,
+    path: '/finance/wallets',
+  },
+  {
+    id: 'finance-statistics',
+    name: 'Statistik',
+    icon: StatsReport,
+    path: '/finance/statistics',
+  },
+  {
+    id: 'finance-settings',
+    name: 'Pengaturan',
+    icon: Settings,
+    path: '/finance/settings',
+  },
+]
+
+const investmentsSubnav = [
+  {
+    id: 'investments-stocks',
+    name: 'Saham',
+    icon: GraphUp,
+    path: '/investments',
+  },
+  {
+    id: 'investments-history',
+    name: 'Riwayat',
+    icon: List,
+    path: '/investments/history',
+  },
+  {
+    id: 'investments-cash',
+    name: 'Cash RDN',
+    icon: Coins,
+    path: '/investments/cash',
   },
 ]
 
