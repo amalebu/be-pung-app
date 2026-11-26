@@ -33,11 +33,28 @@ export const authService = {
   },
 
   async getGoogleRedirectUrl() {
-    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    let frontendOrigin = ''
+    if (typeof window !== 'undefined') {
+      const basePath = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '')
+      frontendOrigin = `${window.location.origin}${basePath}`
+    }
     const response = await api.get('/auth/google/redirect', {
-      params: origin ? { origin } : {},
+      params: frontendOrigin ? { origin: frontendOrigin } : {},
     })
-    return response.data
+    const resData = response.data
+    if (resData?.data?.url && frontendOrigin) {
+      try {
+        const urlObj = new URL(resData.data.url)
+        urlObj.searchParams.set(
+          'state',
+          btoa(JSON.stringify({ frontend_origin: frontendOrigin }))
+        )
+        resData.data.url = urlObj.toString()
+      } catch {
+        // ignore URL parse errors
+      }
+    }
+    return resData
   },
 
   async register(payload) {
