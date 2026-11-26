@@ -13,7 +13,6 @@ import InvestmentBuySheet from '@/components/modules/investments/InvestmentBuySh
 import { useTodoStore } from '@/stores/todoStore'
 import { useHabitStore } from '@/stores/habitStore'
 import { useInvestmentStore } from '@/stores/investmentStore'
-import { useFinanceStore } from '@/stores/financeStore'
 import { useNetworkStore } from '@/stores/networkStore'
 
 const showQuickActions = ref(false)
@@ -23,7 +22,6 @@ const isScrolled = ref(false)
 const todoStore = useTodoStore()
 const habitStore = useHabitStore()
 const investmentStore = useInvestmentStore()
-const financeStore = useFinanceStore()
 const networkStore = useNetworkStore()
 const route = useRoute()
 
@@ -161,14 +159,12 @@ async function handleHabitFormSubmit(payload) {
     />
 
     <!-- Layout Body: Fixed Sidenav + Scrollable Content Stream -->
-    <!-- :class="networkStore.topToast.show ? 'pt-[6.5rem] md:pt-[5.25rem]' : 'pt-20 md:pt-14'" -->
     <div
       class="flex-1 flex overflow-hidden min-h-0 transition-all duration-300 ease-out"
+      :class="networkStore.topToast.show ? 'pt-[6.5rem] md:pt-[5.25rem]' : 'pt-20 md:pt-14'"
     >
       <!-- Desktop Sidebar (Fixed left, fills height under header) -->
-       
-        <AppSidebar />
-       
+      <AppSidebar />
 
       <!-- Mobile Left-Sliding Sidenav Drawer (Swipe gesture preserved) -->
       <AppMobileDrawer
@@ -181,7 +177,7 @@ async function handleHabitFormSubmit(payload) {
         <main
           ref="mainScrollRef"
           @scroll="handleMainScroll"
-          class="flex-1 overflow-y-auto overscroll-contain p-4 md:p-6 pb-28 md:pb-8 md:pt-20 w-full mx-auto custom-scrollbar"
+          class="flex-1 overflow-y-auto overscroll-contain p-4 md:p-6 pb-28 md:pb-8 max-w-7xl w-full mx-auto custom-scrollbar"
         >
           <slot />
         </main>

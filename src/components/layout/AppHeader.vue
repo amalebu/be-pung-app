@@ -84,14 +84,14 @@ function handleLockNow() {
 
 <template>
   <header
-    class="sticy md:fixed left-0 right-0 z-50 select-none transition-all duration-100 ease-out px-4 sm:px-5 flex items-center justify-between"
+    class="fixed left-0 right-0 z-50 select-none transition-all duration-300 ease-out px-3.5 sm:px-5 flex items-center justify-between"
     :class="[
       networkStore.topToast.show
         ? 'top-7'
-        : (isScrolled ? 'top-0' : 'top-4 md:top-0 '),
+        : (isScrolled ? 'top-0' : 'top-4 md:top-0'),
       isScrolled
-        ? 'h-16 md:h-14 bg-white/50 dark:bg-zinc-900/90 backdrop-blur-md border-b border-slate-200/90 dark:border-zinc-800 shadow-2xs'
-        : 'h-24 md:h-14 bg-slate-50/80 dark:bg-zinc-950/80 md:bg-white/85 md:dark:bg-zinc-900/85 md:backdrop-blur-md border-b border-transparent md:border-slate-200/90 md:dark:border-zinc-800',
+        ? 'h-14 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-b border-slate-200/90 dark:border-zinc-800 shadow-2xs'
+        : 'h-16 md:h-14 bg-slate-50/80 dark:bg-zinc-950/80 md:bg-white/85 md:dark:bg-zinc-900/85 backdrop-blur-xs md:backdrop-blur-md border-b border-transparent md:border-slate-200/90 md:dark:border-zinc-800',
     ]"
   >
     <!-- LEFT SECTION -->
@@ -161,6 +161,16 @@ function handleLockNow() {
             </span>
           </div>
         </Transition>
+      </div>
+
+      <!-- DESKTOP TITLE -->
+      <div class="hidden md:flex flex-col justify-center truncate">
+        <span class="text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider leading-none mb-1">
+          {{ greeting }}
+        </span>
+        <BaseHeading as="h1" size="md" weight="bold" class="truncate leading-none text-slate-800 dark:text-zinc-100 text-sm sm:text-base">
+          {{ authStore.user?.name || 'Pengguna' }}!
+        </BaseHeading>
       </div>
 
 

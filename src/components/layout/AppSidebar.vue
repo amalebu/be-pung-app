@@ -25,7 +25,7 @@ async function handleLogout() {
 
 <template>
   <aside
-    class="hidden md:flex flex-col h-full overflow-hidden border-r border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-all duration-200 shrink-0 z-30 select-none md:pt-20"
+    class="hidden md:flex flex-col h-full overflow-hidden border-r border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition-all duration-200 shrink-0 z-30 select-none"
     :class="collapsed ? 'w-16' : 'w-60'"
   >
     <!-- Navigation Links (Scrollable area) -->

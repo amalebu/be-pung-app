@@ -34,7 +34,7 @@ onMounted(() => {
     <AppShell v-if="isAppRoute">
       <router-view v-slot="{ Component, route: currentRoute }">
         <Transition name="page-left" mode="out-in">
-          <component :is="Component" :key="currentRoute.meta?.menuKey || currentRoute.name" />
+          <component :is="Component" :key="currentRoute.name" />
         </Transition>
       </router-view>
     </AppShell>
@@ -46,7 +46,7 @@ onMounted(() => {
     >
       <router-view v-slot="{ Component, route: currentRoute }">
         <Transition name="page-left" mode="out-in">
-          <component :is="Component" :key="currentRoute.meta?.menuKey || currentRoute.name" />
+          <component :is="Component" :key="currentRoute.name" />
         </Transition>
       </router-view>
     </div>
