@@ -1,4 +1,4 @@
-import { ViewGrid, Wallet, GraphUp, Spark, CheckSquare, OpenBook, Calendar, Check, List, CheckCircle } from '@iconoir/vue'
+import { ViewGrid, Wallet, GraphUp, Spark, CheckSquare, OpenBook, Calendar, Check, List, CheckCircle, Camera, Settings } from '@iconoir/vue'
 
 export const mainNavItems = [
   {
@@ -9,9 +9,9 @@ export const mainNavItems = [
   },
   {
     name: 'Finance Tracker',
-    path: '/dashboard',
+    path: '/finance',
     icon: Wallet,
-    badge: 'Segera',
+    badge: null,
   },
   {
     name: 'Investment',
@@ -31,6 +31,40 @@ export const mainNavItems = [
     icon: CheckSquare,
     badge: null,
   },
+  {
+    name: 'PhotoMarker',
+    path: '/photomarker',
+    icon: Camera,
+    badge: null,
+  },
+]
+
+const financeSubnav = [
+  { id: 'finance-summary', name: 'Ringkasan', icon: ViewGrid, path: '/finance' },
+  { id: 'finance-wallets', name: 'Dompet & Kartu', icon: Wallet, path: '/finance/wallets' },
+  { id: 'finance-statistics', name: 'Statistik', icon: GraphUp, path: '/finance/statistics' },
+  { id: 'finance-settings', name: 'Pengaturan', icon: Settings, path: '/finance/settings' },
+]
+
+const investmentsSubnav = [
+  {
+    id: 'investments-holdings',
+    name: 'Portofolio Saham',
+    icon: GraphUp,
+    path: '/investments',
+  },
+  {
+    id: 'investments-sales',
+    name: 'Realized P/L',
+    icon: CheckCircle,
+    path: '/investments/history',
+  },
+  {
+    id: 'investments-cash',
+    name: 'Cash RDN',
+    icon: Wallet,
+    path: '/investments/cash',
+  },
 ]
 
 // Konfigurasi Submenu per Route Name
@@ -38,28 +72,17 @@ export const subnavConfig = {
   dashboard: [
     // Kosong: tombol '+' otomatis beralih ke FAB kanan bawah
   ],
-  investments: [
-    {
-      id: 'investments-holdings',
-      name: 'Portofolio Saham',
-      icon: GraphUp,
-      path: '/investments',
-    },
-    {
-      id: 'investments-sales',
-      name: 'Realized P/L',
-      icon: CheckCircle,
-      path: '/investments',
-      query: { tab: 'sales' },
-    },
-    {
-      id: 'investments-cash',
-      name: 'Cash RDN',
-      icon: Wallet,
-      path: '/investments',
-      query: { tab: 'cash' },
-    },
-  ],
+  'finance-summary': financeSubnav,
+  'finance-wallets': financeSubnav,
+  'finance-statistics': financeSubnav,
+  'finance-settings': financeSubnav,
+  'finance-budgeting': financeSubnav,
+  'finance-savings': financeSubnav,
+  'finance-debts': financeSubnav,
+  'finance-wishlist': financeSubnav,
+  investments: investmentsSubnav,
+  'investments-history': investmentsSubnav,
+  'investments-cash': investmentsSubnav,
   habits: [
     {
       id: 'habits-list',

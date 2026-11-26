@@ -51,4 +51,14 @@ export const investmentService = {
     const response = await api.post('/investments/positions/close', payload)
     return response.data
   },
+
+  async deleteStockSale(saleId) {
+    const response = await api.delete(`/investments/sales/${saleId}`)
+    return response.data
+  },
+
+  async recalculateFees() {
+    const response = await api.post('/investments/recalculate-fees')
+    return response.data
+  },
 }

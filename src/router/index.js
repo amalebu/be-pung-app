@@ -4,10 +4,9 @@ import LoginView from '@/views/auth/LoginView.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import TodoView from '@/views/todos/TodoView.vue'
 import HabitView from '@/views/habits/HabitView.vue'
-import InvestmentView from '@/views/investments/InvestmentView.vue'
 import ProfileView from '@/views/profile/ProfileView.vue'
 import SettingsView from '@/views/settings/SettingsView.vue'
-import VerifyPinView from '@/views/auth/VerifyPinView.vue'
+import PhotoMarkerView from '@/views/photos/PhotoMarkerView.vue'
 
 const routes = [
   {
@@ -22,9 +21,7 @@ const routes = [
   },
   {
     path: '/verify-pin',
-    name: 'verify-pin',
-    component: VerifyPinView,
-    meta: { requiresAuth: true, isPinRoute: true },
+    redirect: '/dashboard',
   },
   {
     path: '/register',
@@ -37,10 +34,102 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/finance',
+    component: () => import('@/views/finance/FinanceLayout.vue'),
+    meta: { requiresAuth: true, menuKey: 'finance' },
+    children: [
+      {
+        path: '',
+        name: 'finance-summary',
+        component: () => import('@/views/finance/FinanceSummaryView.vue'),
+        meta: { requiresAuth: true, menuKey: 'finance' },
+      },
+      {
+        path: 'wallets',
+        name: 'finance-wallets',
+        component: () => import('@/views/finance/FinanceWalletsView.vue'),
+        meta: { requiresAuth: true, menuKey: 'finance' },
+      },
+      {
+        path: 'budgeting',
+        name: 'finance-budgeting',
+        component: () => import('@/views/finance/FinanceBudgetingView.vue'),
+        meta: { requiresAuth: true, menuKey: 'finance' },
+      },
+      {
+        path: 'statistics',
+        name: 'finance-statistics',
+        component: () => import('@/views/finance/FinanceStatisticsView.vue'),
+        meta: { requiresAuth: true, menuKey: 'finance' },
+      },
+      {
+        path: 'settings',
+        name: 'finance-settings',
+        component: () => import('@/views/finance/FinanceSettingsView.vue'),
+        meta: { requiresAuth: true, menuKey: 'finance' },
+      },
+      {
+        path: 'savings',
+        name: 'finance-savings',
+        component: () => import('@/views/finance/FinanceSavingsView.vue'),
+        meta: { requiresAuth: true, menuKey: 'finance' },
+      },
+      {
+        path: 'debts',
+        name: 'finance-debts',
+        component: () => import('@/views/finance/FinanceDebtsView.vue'),
+        meta: { requiresAuth: true, menuKey: 'finance' },
+      },
+      {
+        path: 'wishlist',
+        name: 'finance-wishlist',
+        component: () => import('@/views/finance/FinanceWishlistView.vue'),
+        meta: { requiresAuth: true, menuKey: 'finance' },
+      },
+    ],
+  },
+  {
     path: '/investments',
-    name: 'investments',
-    component: InvestmentView,
-    meta: { requiresAuth: true },
+    component: () => import('@/views/investments/InvestmentLayout.vue'),
+    meta: { requiresAuth: true, menuKey: 'investments' },
+    children: [
+      {
+        path: '',
+        name: 'investments',
+        component: () => import('@/views/investments/InvestmentHoldingsView.vue'),
+        meta: { requiresAuth: true, menuKey: 'investments' },
+        beforeEnter: (to) => {
+          if (to.query.tab === 'sales') {
+            return { path: '/investments/history' }
+          }
+          if (to.query.tab === 'summary') {
+            return { path: '/investments/history', query: { tab: 'summary' } }
+          }
+          if (to.query.tab === 'cash') {
+            return { path: '/investments/cash' }
+          }
+          return true
+        },
+      },
+      {
+        path: 'history',
+        name: 'investments-history',
+        component: () => import('@/views/investments/InvestmentHistoryView.vue'),
+        meta: { requiresAuth: true, menuKey: 'investments' },
+        beforeEnter: (to) => {
+          if (to.query.tab === 'cash') {
+            return { path: '/investments/cash' }
+          }
+          return true
+        },
+      },
+      {
+        path: 'cash',
+        name: 'investments-cash',
+        component: () => import('@/views/investments/InvestmentCashView.vue'),
+        meta: { requiresAuth: true, menuKey: 'investments' },
+      },
+    ],
   },
   {
     path: '/todos',
@@ -52,6 +141,12 @@ const routes = [
     path: '/habits',
     name: 'habits',
     component: HabitView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/photomarker',
+    name: 'photomarker',
+    component: PhotoMarkerView,
     meta: { requiresAuth: true },
   },
   {
@@ -90,29 +185,6 @@ router.beforeEach((to) => {
 
   // 2. Jika user sudah login dan mengakses halaman guest (seperti /login)
   if (to.meta.guestOnly && authStore.isAuthenticated) {
-    if (authStore.isPinLocked || authStore.needsPinSetup) {
-      return { name: 'verify-pin' }
-    }
-    return { name: 'dashboard' }
-  }
-
-  // 3. Jika user sudah login dan layar terkunci PIN (atau belum setup PIN)
-  if (authStore.isAuthenticated && (authStore.isPinLocked || authStore.needsPinSetup)) {
-    if (to.name === 'verify-pin') {
-      return true
-    }
-    return {
-      name: 'verify-pin',
-      query: { redirect: to.fullPath },
-    }
-  }
-
-  // 4. Jika user sudah login dan TIDAK terkunci, cegah akses manual ke /verify-pin
-  if (authStore.isAuthenticated && !authStore.isPinLocked && !authStore.needsPinSetup && to.name === 'verify-pin') {
-    const target = to.query.redirect
-    if (target && typeof target === 'string' && target.startsWith('/') && target !== '/verify-pin') {
-      return target
-    }
     return { name: 'dashboard' }
   }
 

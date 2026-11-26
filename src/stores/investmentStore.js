@@ -43,6 +43,7 @@ export const useInvestmentStore = defineStore('investment', () => {
   const loading = ref(false)
   const refreshingPrices = ref(false)
   const saving = ref(false)
+  const hasLoaded = ref(false)
   const errorMessage = ref('')
 
   // BottomSheet Modal States
@@ -82,6 +83,78 @@ export const useInvestmentStore = defineStore('investment', () => {
         (s.ticker || '').toLowerCase().includes(q) ||
         (s.company_name || '').toLowerCase().includes(q)
     )
+  })
+
+  const realizedMetrics = computed(() => {
+    const allSales = sales.value || []
+    let sumRealized = 0
+    let todayRealized = 0
+    let winCount = 0
+    let lossCount = 0
+    let evenCount = 0
+    let winTotalAmount = 0
+    let lossTotalAmount = 0
+    let maxWin = null
+    let maxLoss = null
+
+    // Format tanggal hari ini (YYYY-MM-DD waktu lokal Jakarta)
+    let todayStr = ''
+    try {
+      todayStr = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date())
+    } catch {
+      todayStr = new Date().toISOString().split('T')[0]
+    }
+
+    for (const sale of allSales) {
+      const pl = Number(sale.realized_pl || 0)
+      sumRealized += pl
+
+      const saleDate = String(sale.sold_at || '').split('T')[0]
+      if (saleDate === todayStr) {
+        todayRealized += pl
+      }
+
+      if (pl > 0) {
+        winCount++
+        winTotalAmount += pl
+        if (!maxWin || pl > Number(maxWin.realized_pl || 0)) {
+          maxWin = sale
+        }
+      } else if (pl < 0) {
+        lossCount++
+        lossTotalAmount += pl
+        if (!maxLoss || pl < Number(maxLoss.realized_pl || 0)) {
+          maxLoss = sale
+        }
+      } else {
+        evenCount++
+      }
+    }
+
+    const totalCount = allSales.length
+    const winRatePercent = totalCount > 0 ? (winCount / totalCount) * 100 : 0
+    const lossRatePercent = totalCount > 0 ? (lossCount / totalCount) * 100 : 0
+    const totalRealized = allSales.length > 0 ? sumRealized : Number(summary.value.realized_pl || 0)
+
+    return {
+      totalRealized,
+      todayRealized,
+      winCount,
+      lossCount,
+      evenCount,
+      totalCount,
+      winRatePercent,
+      lossRatePercent,
+      winTotalAmount,
+      lossTotalAmount,
+      maxWin,
+      maxLoss,
+    }
   })
 
   function applyPortfolioPayload(payload) {
@@ -162,7 +235,62 @@ export const useInvestmentStore = defineStore('investment', () => {
   }
 
   // API Actions
+  /**
+   * Menghitung total transaksi kotor (Buy + Sale) pada tanggal tertentu
+   * yang sudah ada di portofolio (kecuali lot/sale yang sedang diedit).
+   */
+  function getExistingDailyTurnover(dateStr, excludeLotId = null, excludeSaleId = null) {
+    if (!dateStr) return 0
+    const targetDate = String(dateStr).split('T')[0]
+    let total = 0
+
+    // Akumulasi pembelian (Buy lots)
+    for (const stock of (stocks.value || [])) {
+      for (const lot of (stock.lots || [])) {
+        if (excludeLotId && String(lot.id) === String(excludeLotId)) {
+          continue
+        }
+        const lotDate = String(lot.opened_at || '').split('T')[0]
+        if (lotDate === targetDate) {
+          total += (Number(lot.initial_lots || 0) * 100 * Number(lot.buy_price || 0))
+        }
+      }
+    }
+
+    // Akumulasi penjualan (Sales)
+    for (const sale of (sales.value || [])) {
+      if (excludeSaleId && String(sale.id) === String(excludeSaleId)) {
+        continue
+      }
+      const saleDate = String(sale.sold_at || '').split('T')[0]
+      if (saleDate === targetDate) {
+        total += (Number(sale.sold_lots || 0) * 100 * Number(sale.sell_price || 0))
+      }
+    }
+
+    return total
+  }
+
+  /**
+   * Memeriksa apakah transaksi pada tanggal tertentu dengan nilai kotor baru
+   * akan memicu Fee Materai Rp 10.000 untuk pertama kalinya hari itu.
+   * Return true HANYA jika sebelum transaksi ini turnover <= 10jt DAN setelah ditambah menjadi > 10jt.
+   */
+  function willTriggerDailyStampDuty(dateStr, newGrossTurnover, excludeLotId = null, excludeSaleId = null) {
+    const existing = getExistingDailyTurnover(dateStr, excludeLotId, excludeSaleId)
+    // Jika sebelum transaksi ini sudah > 10jt, fee materai sudah aktif di transaksi sebelumnya -> tidak tampil lagi
+    if (existing > 10000000) {
+      return false
+    }
+    // Jika sebelum <= 10jt dan setelah ditambah transaksi ini menjadi > 10jt -> tampilkan
+    return (existing + Number(newGrossTurnover || 0)) > 10000000
+  }
+
   async function fetchPortfolio(forceRefresh = false) {
+    if (hasLoaded.value && !forceRefresh) {
+      return { success: true }
+    }
+
     clearErrors()
     const userId = getCurrentUserId()
 
@@ -177,6 +305,7 @@ export const useInvestmentStore = defineStore('investment', () => {
 
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       loading.value = false
+      hasLoaded.value = true
       return { success: true, offline: true }
     }
 
@@ -188,6 +317,7 @@ export const useInvestmentStore = defineStore('investment', () => {
       if (res.data) {
         applyPortfolioPayload(res.data)
         await localDb.saveCachedPortfolio(userId, res.data)
+        hasLoaded.value = true
       }
       return { success: true }
     } catch (err) {
@@ -333,16 +463,57 @@ export const useInvestmentStore = defineStore('investment', () => {
     }
   }
 
+  async function submitDeleteSale(saleId) {
+    saving.value = true
+    clearErrors()
+    const userId = getCurrentUserId()
+    try {
+      const res = await investmentService.deleteStockSale(saleId)
+      if (res.data) {
+        applyPortfolioPayload(res.data)
+        await localDb.saveCachedPortfolio(userId, res.data)
+      }
+      return { success: true }
+    } catch (err) {
+      errorMessage.value =
+        err.response?.data?.message || 'Gagal membatalkan transaksi penjualan.'
+      return { success: false, message: errorMessage.value }
+    } finally {
+      saving.value = false
+    }
+  }
+
+  async function recalculateFees() {
+    loading.value = true
+    clearErrors()
+    const userId = getCurrentUserId()
+    try {
+      const res = await investmentService.recalculateFees()
+      if (res.data) {
+        applyPortfolioPayload(res.data)
+        await localDb.saveCachedPortfolio(userId, res.data)
+      }
+      return { success: true }
+    } catch (err) {
+      errorMessage.value = err.response?.data?.message || 'Gagal menghitung ulang fee materai.'
+      return { success: false }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     summary,
     cash,
     stocks,
     sales,
+    realizedMetrics,
     filteredStocks,
     searchQuery,
     activeTab,
     expandedTickerIds,
     loading,
+    hasLoaded,
     refreshingPrices,
     saving,
     errorMessage,
@@ -373,5 +544,9 @@ export const useInvestmentStore = defineStore('investment', () => {
     submitUpdateLot,
     submitDeleteLot,
     submitClosePosition,
+    submitDeleteSale,
+    recalculateFees,
+    getExistingDailyTurnover,
+    willTriggerDailyStampDuty,
   }
 })

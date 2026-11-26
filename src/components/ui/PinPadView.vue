@@ -20,6 +20,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  compact: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['complete', 'clear-error'])
@@ -103,7 +107,10 @@ defineExpose({ resetPin })
     </div>
 
     <!-- Bottom: Virtual Tactile Numpad Grid -->
-    <div class="w-full pb-[calc(env(safe-area-inset-bottom,0px)+3rem)] flex flex-col items-center gap-4 mt-auto pt-2">
+    <div
+      class="w-full flex flex-col items-center gap-4 mt-auto pt-2"
+      :class="compact ? 'pb-2 md:pb-0' : 'pb-[calc(env(safe-area-inset-bottom,0px)+3rem)]'"
+    >
       <PinNumpad
         :disabled="loading"
         @digit="handleDigit"

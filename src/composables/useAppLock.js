@@ -12,16 +12,6 @@ export function useAppLock() {
     authStore.checkInactivityLock()
     if (wasAuthenticated && !authStore.isAuthenticated) {
       router.push('/login')
-      return
-    }
-
-    if (authStore.isAuthenticated && (authStore.isPinLocked || authStore.needsPinSetup)) {
-      if (router.currentRoute.value.name !== 'verify-pin') {
-        router.push({
-          name: 'verify-pin',
-          query: { redirect: router.currentRoute.value.fullPath },
-        })
-      }
     }
   }
 

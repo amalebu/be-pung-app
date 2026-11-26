@@ -31,7 +31,7 @@ function handleSubnavClick(item) {
   >
     <!-- Capsule Container for Submenu Icons (Tinggi h-13) -->
     <div
-      class="pointer-events-auto h-13 flex items-center gap-1 px-1.5 rounded-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200/90 dark:border-zinc-800 shadow-[0_8px_30px_rgba(0,0,0,0.12)]"
+      class="pointer-events-auto h-15 flex items-center gap-3 px-1.5 rounded-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200/90 dark:border-zinc-800 shadow-[0_8px_30px_rgba(0,0,0,0.12)]"
     >
       <button
         v-for="item in subnavItems"
@@ -40,8 +40,8 @@ function handleSubnavClick(item) {
         @click="handleSubnavClick(item)"
         class="flex items-center justify-center transition-all duration-200 rounded-full cursor-pointer"
         :class="isItemActive(item)
-          ? 'w-10 h-10 bg-slate-200/80 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-xs'
-          : 'w-10 h-10 text-slate-400 hover:text-slate-600 dark:text-zinc-500 dark:hover:text-zinc-300'"
+          ? 'w-12 h-12 bg-slate-200/80 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-xs'
+          : 'w-12 h-12 text-slate-400 hover:text-slate-600 dark:text-zinc-500 dark:hover:text-zinc-300'"
         :title="item.name"
       >
         <component :is="item.icon" class="w-5 h-5 stroke-[2]" />

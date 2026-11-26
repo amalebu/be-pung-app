@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { User, Phone, Key, CheckCircle, WarningCircle, ShieldCheck, Link, FloppyDisk, ArrowLeft, Lock } from '@iconoir/vue'
 import { useRouter } from 'vue-router'
-import AppShell from '@/components/layout/AppShell.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseHeading from '@/components/ui/BaseHeading.vue'
 import BaseText from '@/components/ui/BaseText.vue'
@@ -196,8 +195,7 @@ async function handleGoogleRedirect() {
 </script>
 
 <template>
-  <AppShell>
-    <div class="space-y-4 md:space-y-6 max-w-4xl mx-auto">
+  <div class="space-y-4 md:space-y-6 max-w-4xl mx-auto">
       <!-- Breadcrumb & Page Header -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -559,6 +557,5 @@ async function handleGoogleRedirect() {
           </div>
         </div>
       </BaseCard>
-    </div>
-  </AppShell>
+  </div>
 </template>

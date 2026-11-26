@@ -23,7 +23,7 @@ export const authService = {
   },
 
   async verifyPin(pin) {
-    const response = await api.post('/auth/pin/verify', { pin })
+    const response = await api.post('/auth/pin/verify', { pin }, { timeout: 3500 })
     return response.data
   },
 
@@ -33,7 +33,10 @@ export const authService = {
   },
 
   async getGoogleRedirectUrl() {
-    const response = await api.get('/auth/google/redirect')
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const response = await api.get('/auth/google/redirect', {
+      params: origin ? { origin } : {},
+    })
     return response.data
   },
 

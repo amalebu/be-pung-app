@@ -490,9 +490,12 @@ export const useHabitStore = defineStore('habit', () => {
   async function logProgress(habitId, { logged_date = getTodayDateStr(0), mode = 'increment', value = 1, note = null, immediate = false }) {
     const userId = getCurrentUserId()
 
-    // 1. Ambil state habit (utamakan in-memory reactive state habits.value untuk respon instan 0ms)
+    // 1. Ambil state habit (utamakan in-memory reactive state allHabits atau habits untuk respon instan 0ms)
     let habitIdx = habits.value.findIndex((h) => Number(h.id) === Number(habitId))
-    let existing = habitIdx !== -1 ? habits.value[habitIdx] : null
+    let allHabitIdx = allHabits.value.findIndex((h) => Number(h.id) === Number(habitId))
+    let existing =
+      (allHabitIdx !== -1 ? allHabits.value[allHabitIdx] : null) ||
+      (habitIdx !== -1 ? habits.value[habitIdx] : null)
 
     if (!existing) {
       const allCached = await localDb.getCachedHabits(userId)
@@ -503,7 +506,10 @@ export const useHabitStore = defineStore('habit', () => {
     // 2. Kalkulasi nilai baru secara optimis
     const currentLogs = Array.isArray(existing.logs) ? [...existing.logs] : []
     const logIdx = currentLogs.findIndex((l) => l.logged_date === logged_date)
-    const prevVal = logIdx !== -1 ? Number(currentLogs[logIdx].value || 0) : 0
+    const prevVal =
+      logIdx !== -1
+        ? Number(currentLogs[logIdx].value || 0)
+        : Number(existing.today_value || 0)
     const nextVal =
       mode === 'set'
         ? Math.max(0, Math.round(Number(value) * 100) / 100)
@@ -532,13 +538,22 @@ export const useHabitStore = defineStore('habit', () => {
     })
 
     // 3. UPDATE STATE IN-MEMORY SECARA SINKRON (0ms - bebas lag & bebas maju-mundur)
+    if (allHabitIdx !== -1) {
+      allHabits.value[allHabitIdx] = optimisticHabit
+    } else {
+      allHabits.value.push(optimisticHabit)
+    }
+    allHabits.value = [...allHabits.value]
+
     if (habitIdx !== -1) {
       habits.value[habitIdx] = optimisticHabit
     } else {
       habits.value.push(optimisticHabit)
       habitIdx = habits.value.length - 1
     }
-    summary.value = computeLocalSummary(habits.value)
+    habits.value = [...habits.value]
+
+    summary.value = computeLocalSummary(allHabits.value.length ? allHabits.value : habits.value)
 
     // 4. Simpan ke IndexedDB di background
     await localDb.putCachedHabit(optimisticHabit)

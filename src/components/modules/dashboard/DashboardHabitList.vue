@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Plus, Check, NavArrowRight, FireFlame, Spark } from '@iconoir/vue'
 import { getHabitIcon } from '@/utils/habitIcons'
 
@@ -16,16 +16,107 @@ function formatNumber(n) {
   return Number.isInteger(v) ? String(v) : v.toLocaleString('id-ID')
 }
 
-// Good habit yang belum tercapai tampil lebih dulu
-const visibleHabits = computed(() =>
-  [...props.habits]
-    .sort((a, b) => {
-      if (a.type !== b.type) return a.type === 'good' ? -1 : 1
-      if (a.is_today_goal_met !== b.is_today_goal_met) return a.is_today_goal_met ? 1 : -1
-      return Number(b.current_streak || 0) - Number(a.current_streak || 0)
-    })
-    .slice(0, props.limit)
+// Optimistic override map keyed by habit id (respon instan 0ms saat tombol + ditekan)
+const optimisticMap = ref({})
+
+// Bersihkan override ketika data props dari store sudah menyusul/sama dengan nilai optimis
+watch(
+  () => props.habits,
+  (newHabits) => {
+    if (!newHabits || !Object.keys(optimisticMap.value).length) return
+    for (const h of newHabits) {
+      const opt = optimisticMap.value[h.id]
+      if (opt && Number(h.today_value || 0) >= Number(opt.today_value || 0)) {
+        delete optimisticMap.value[h.id]
+      }
+    }
+  },
+  { deep: true }
 )
+
+function handleIncrement(habit) {
+  const step = Math.max(0.01, Number(habit.step_value || 1))
+  const currentVal = Number(
+    optimisticMap.value[habit.id]?.today_value ?? habit.today_value ?? 0
+  )
+  const nextVal = Math.round((currentVal + step) * 100) / 100
+  const target = Math.max(0, Number(habit.target_value || 0))
+  const isGoalMet =
+    habit.type === 'good'
+      ? target > 0
+        ? nextVal >= target
+        : nextVal > 0
+      : nextVal <= target
+
+  let streak = Number(habit.current_streak || 0)
+  if (habit.type === 'good' && !habit.is_today_goal_met && isGoalMet) {
+    streak += 1
+  }
+
+  optimisticMap.value[habit.id] = {
+    today_value: nextVal,
+    is_today_goal_met: isGoalMet,
+    current_streak: streak,
+  }
+
+  emit('increment', habit)
+}
+
+// Gabungkan props dengan data optimis lokal
+const mergedHabits = computed(() => {
+  return props.habits.map((h) => {
+    const opt = optimisticMap.value[h.id]
+    if (!opt) return h
+    return {
+      ...h,
+      today_value: opt.today_value,
+      is_today_goal_met: opt.is_today_goal_met,
+      current_streak: opt.current_streak ?? h.current_streak,
+    }
+  })
+})
+
+// Urutan habit dijaga tetap stabil saat sesi agar tidak mendadak loncat/hilang saat target tercapai
+const stableOrderIds = ref([])
+
+watch(
+  () => props.habits,
+  (newHabits) => {
+    if (!newHabits || !newHabits.length) {
+      stableOrderIds.value = []
+      return
+    }
+    if (stableOrderIds.value.length === 0) {
+      const sorted = [...newHabits].sort((a, b) => {
+        if (a.type !== b.type) return a.type === 'good' ? -1 : 1
+        if (a.is_today_goal_met !== b.is_today_goal_met) return a.is_today_goal_met ? 1 : -1
+        return Number(b.current_streak || 0) - Number(a.current_streak || 0)
+      })
+      stableOrderIds.value = sorted.map((h) => h.id)
+    } else {
+      const existingIds = new Set(stableOrderIds.value)
+      for (const h of newHabits) {
+        if (!existingIds.has(h.id)) {
+          stableOrderIds.value.push(h.id)
+        }
+      }
+      const currentIds = new Set(newHabits.map((h) => h.id))
+      stableOrderIds.value = stableOrderIds.value.filter((id) => currentIds.has(id))
+    }
+  },
+  { immediate: true }
+)
+
+const visibleHabits = computed(() => {
+  const map = new Map(mergedHabits.value.map((h) => [h.id, h]))
+  const result = []
+  for (const id of stableOrderIds.value) {
+    const h = map.get(id)
+    if (h) result.push(h)
+    if (result.length >= props.limit) break
+  }
+  return result
+})
 
 function progressPercent(habit) {
   const target = Number(habit.target_value || 0)
@@ -78,7 +169,7 @@ function barClass(habit) {
       <li
         v-for="habit in visibleHabits"
         :key="habit.id"
-        class="flex items-center gap-3 rounded-2xl px-3 py-3 bg-[#f9f9fc] dark:bg-zinc-800/40"
+        class="flex items-center gap-3 rounded-2xl py-3 md:px-2 md:bg-gray-100 dark:md:bg-zinc-800/40"
       >
         <span
           class="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center"
@@ -128,7 +219,7 @@ function barClass(habit) {
         <button
           v-else
           type="button"
-          @click="emit('increment', habit)"
+          @click="handleIncrement(habit)"
           class="w-9 h-9 shrink-0 rounded-full flex items-center justify-center bg-white dark:bg-zinc-900 border border-[#e2e2e5] dark:border-zinc-700 text-slate-700 dark:text-zinc-200 hover:border-[#144229] hover:text-[#144229] dark:hover:border-[#a1d2af] dark:hover:text-[#a1d2af] active:scale-90 transition-all cursor-pointer"
           :title="`Catat +${formatNumber(habit.step_value || 1)} ${habit.unit || ''}`"
         >

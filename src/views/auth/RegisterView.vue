@@ -144,7 +144,7 @@ async function handleSubmit() {
     <!-- Footer -->
     <div class="max-w-md w-full mx-auto text-center">
       <BaseText size="xs" variant="muted">
-        Terhubung ke `laravelAPI` (`https://local.amalebu.test`) • SQLite Isolated
+        Terhubung ke `laravelAPI` (`https://dandy-lightgray-sandpiper-04.hostingersite.com`) • SQLite Isolated
       </BaseText>
     </div>
   </div>

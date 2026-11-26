@@ -10,6 +10,9 @@ import StockAvatar from '@/components/ui/StockAvatar.vue'
 import { investmentService } from '@/services/investmentService'
 import { formatRupiah, formatSharePrice, calculateDefaultBuyFee } from '@/utils/currencyUtils'
 import { getJakartaTodayStr } from '@/utils/dateUtils'
+import { useInvestmentStore } from '@/stores/investmentStore'
+
+const investmentStore = useInvestmentStore()
 
 const props = defineProps({
   show: {
@@ -56,6 +59,10 @@ let searchTimer = null
 const totalShares = computed(() => Math.max(0, Number(lots.value || 0)) * 100)
 const grossCost = computed(() => totalShares.value * Math.max(0, Number(buyPrice.value || 0)))
 const totalCost = computed(() => grossCost.value + Math.max(0, Number(buyFee.value || 0)))
+const isFeeMateraiApplied = computed(() => {
+  return investmentStore.willTriggerDailyStampDuty(openedAt.value, grossCost.value)
+})
+
 const isCashSufficient = computed(
   () => !deductFromCash.value || Number(props.cashBalance) >= totalCost.value
 )
@@ -353,6 +360,16 @@ function handleSubmit() {
             <span class="text-[10px] font-normal text-slate-400">
               {{ isFeeManuallyEdited ? '(manual)' : '(0.1513%)' }}
             </span>
+          </span>
+        </div>
+
+        <div
+          v-if="isFeeMateraiApplied"
+          class="flex items-center justify-between text-xs text-slate-600 dark:text-zinc-400"
+        >
+          <span>Fee Materai:</span>
+          <span class="font-bold tabular-nums text-slate-800 dark:text-zinc-200">
+            Rp 10.000
           </span>
         </div>
 

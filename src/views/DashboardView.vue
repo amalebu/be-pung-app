@@ -1,19 +1,17 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { CheckCircle, WarningTriangle, Spark, FireFlame, Wallet, Lock, GraphUp, ArrowRight, Eye, EyeClosed } from '@iconoir/vue'
-import AppShell from '@/components/layout/AppShell.vue'
+import { CheckCircle, WarningTriangle, Spark, FireFlame, Wallet, Lock } from '@iconoir/vue'
 import DashboardHero from '@/components/modules/dashboard/DashboardHero.vue'
 import DashboardStatTile from '@/components/modules/dashboard/DashboardStatTile.vue'
 import DashboardWeeklyChart from '@/components/modules/dashboard/DashboardWeeklyChart.vue'
 import DashboardFocusList from '@/components/modules/dashboard/DashboardFocusList.vue'
 import DashboardHabitList from '@/components/modules/dashboard/DashboardHabitList.vue'
-import StockAllocationChart from '@/components/modules/investments/StockAllocationChart.vue'
+import DashboardInvestmentHero from '@/components/modules/dashboard/DashboardInvestmentHero.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useTodoStore } from '@/stores/todoStore'
 import { useHabitStore, getTodayDateStr } from '@/stores/habitStore'
 import { useInvestmentStore } from '@/stores/investmentStore'
-import { formatRupiah, formatPercent } from '@/utils/currencyUtils'
 
 const authStore = useAuthStore()
 const todoStore = useTodoStore()
@@ -75,8 +73,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppShell>
-    <div class="space-y-3.5 sm:space-y-5">
+  <div class="space-y-3.5 sm:space-y-5">
       <!-- Baris 1: Hero progres + Grafik mingguan -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         <DashboardHero
@@ -144,77 +141,15 @@ onMounted(() => {
         />
       </div>
 
-      <!-- Baris 4: Ringkasan Investasi & Portofolio Saham -->
-      <section
-        class="relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl p-5 bg-gradient-to-br from-[#d3e4d8]/40 via-white to-white dark:from-[#2d5a3f]/30 dark:via-zinc-900 dark:to-zinc-900 border border-[#144229]/20 dark:border-[#a1d2af]/25 shadow-surface"
-      >
-        <div class="flex items-start gap-4 min-w-0">
-          <span class="w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center bg-[#144229] text-white dark:bg-[#a1d2af] dark:text-[#002110] shadow-surface">
-            <GraphUp class="w-6 h-6 stroke-[2]" />
-          </span>
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <p class="text-sm font-bold text-slate-900 dark:text-zinc-100">Portofolio Investasi & Saham</p>
-              <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#144229]/10 text-[#144229] dark:bg-[#a1d2af]/20 dark:text-[#a1d2af]">
-                BEI / IDX
-              </span>
-              <button
-                type="button"
-                @click="investmentStore.toggleBalanceMask()"
-                class="w-5 h-5 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
-                :title="investmentStore.isBalanceMasked ? 'Tampilkan Nominal Saldo' : 'Sembunyikan Nominal Saldo'"
-              >
-                <component :is="investmentStore.isBalanceMasked ? EyeClosed : Eye" class="w-3.5 h-3.5 stroke-[2]" />
-              </button>
-            </div>
-            <div class="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-              <span class="text-lg font-extrabold tabular-nums text-slate-900 dark:text-zinc-100">
-                {{ investmentStore.isBalanceMasked ? 'Rp ****' : formatRupiah(investmentStore.summary.total_portfolio_value) }}
-              </span>
-              <span
-                class="text-xs font-bold tabular-nums"
-                :class="
-                  investmentStore.isBalanceMasked
-                    ? 'text-slate-500'
-                    : investmentStore.summary.unrealized_pl > 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : investmentStore.summary.unrealized_pl < 0
-                        ? 'text-[#ba1a1a] dark:text-rose-400'
-                        : 'text-slate-500'
-                "
-              >
-                P/L: {{ investmentStore.isBalanceMasked ? '****' : `${formatRupiah(investmentStore.summary.unrealized_pl, { withSign: true })} (${formatPercent(investmentStore.summary.unrealized_pl_percent)})` }}
-              </span>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5 tabular-nums">
-              Cash RDN:
-              <span :class="!investmentStore.isBalanceMasked && Number(investmentStore.summary.cash_balance) < 0 ? 'text-[#ba1a1a] dark:text-rose-400 font-bold' : ''">
-                {{ investmentStore.isBalanceMasked ? 'Rp ****' : formatRupiah(investmentStore.summary.cash_balance) }}
-              </span>
-              · {{ investmentStore.summary.active_tickers_count }} emiten aktif
-            </p>
-          </div>
-        </div>
-
-        <!-- Donut Proporsi Saham Mini -->
-        <div class="py-2 md:py-0 md:px-4 md:border-x border-slate-200/80 dark:border-zinc-800">
-          <StockAllocationChart
-            compact
-            :stocks="investmentStore.stocks"
-            :total-market-value="investmentStore.summary.stock_market_value"
-            :is-masked="investmentStore.isBalanceMasked"
-            @select-ticker="goToInvestmentsWithTicker"
-          />
-        </div>
-
-        <RouterLink
-          to="/investments"
-          class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-[#144229] text-white dark:bg-[#a1d2af] dark:text-[#002110] hover:bg-[#2d5a3f] transition-all cursor-pointer shadow-xs self-start md:self-auto shrink-0"
-        >
-          <span>Kelola Portofolio</span>
-          <ArrowRight class="w-3.5 h-3.5" />
-        </RouterLink>
-      </section>
+      <!-- Baris 4: Hero Portofolio Investasi & Saham (Besar seperti Hero Progres) -->
+      <DashboardInvestmentHero
+        :summary="investmentStore.summary"
+        :stocks="investmentStore.stocks"
+        :is-masked="investmentStore.isBalanceMasked"
+        @toggle-privacy="investmentStore.toggleBalanceMask()"
+        @select-ticker="goToInvestmentsWithTicker"
+        @buy="investmentStore.openBuySheet()"
+      />
 
       <!-- Baris 5: Teaser modul Finance -->
       <section
@@ -235,5 +170,4 @@ onMounted(() => {
         </span>
       </section>
     </div>
-  </AppShell>
 </template>

@@ -73,6 +73,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         navigateFallback: `${baseUrl}index.html`,
         navigateFallbackDenylist: [/^\/api/, /^\/broadcasting/],
       },
@@ -91,18 +92,18 @@ export default defineConfig({
     port: 5173,
     allowedHosts: [
       '9knv83ss-5173.asse.devtunnels.ms',
-      '9knv83ss-8000.asse.devtunnels.ms',
+      'dandy-lightgray-sandpiper-04.hostingersite.com',
       '.asse.devtunnels.ms',
       '.devtunnels.ms',
     ],
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: 'https://dandy-lightgray-sandpiper-04.hostingersite.com',
         changeOrigin: true,
         secure: false,
       },
       '/broadcasting': {
-        target: 'http://127.0.0.1:8000',
+        target: 'https://dandy-lightgray-sandpiper-04.hostingersite.com',
         changeOrigin: true,
         secure: false,
       },

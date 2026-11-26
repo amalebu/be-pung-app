@@ -21,13 +21,20 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  variant: {
+    type: String,
+    default: 'default', // 'default' | 'compact' | 'hero'
+  },
 })
 
 const emit = defineEmits(['select-ticker', 'buy'])
 
 const hoveredTicker = ref(null)
 
-// Palet warna Mint & Charcoal Financial yang harmonis & kontras
+const isHero = computed(() => props.variant === 'hero')
+const isCompact = computed(() => props.compact || props.variant === 'compact')
+
+// Palet warna Mint & Charcoal Financial yang harmonis & kontras di mode card default
 const PALETTE = [
   '#144229', // Deep Forest (Porsi Terbesar #1)
   '#2d5a3f', // Forest Mid (#2)
@@ -36,6 +43,18 @@ const PALETTE = [
   '#f59e0b', // Amber Gold Accent (#5)
   '#717972', // Slate Charcoal Muted ('Lainnya')
 ]
+
+// Palet warna kontras & cerah untuk mode hero gelap (Deep Forest background)
+const HERO_PALETTE = [
+  '#a1d2af', // Bright Mint (#1)
+  '#34d399', // Emerald Neon (#2)
+  '#38bdf8', // Sky Blue (#3)
+  '#fbbf24', // Amber Gold (#4)
+  '#c084fc', // Purple Pastel (#5)
+  '#cbd5e1', // Slate Light ('Lainnya')
+]
+
+const currentPalette = computed(() => (isHero.value ? HERO_PALETTE : PALETTE))
 
 const activeStocks = computed(() => {
   return props.stocks.filter((s) => Number(s.market_value || 0) > 0)
@@ -53,6 +72,7 @@ const chartItems = computed(() => {
   if (!stocks.length || totalVal <= 0) return []
 
   const sorted = [...stocks].sort((a, b) => Number(b.market_value || 0) - Number(a.market_value || 0))
+  const pal = currentPalette.value
 
   let items = []
   if (sorted.length <= 5) {
@@ -61,7 +81,7 @@ const chartItems = computed(() => {
       name: s.company_name,
       market_value: Number(s.market_value || 0),
       percent: (Number(s.market_value || 0) / totalVal) * 100,
-      color: PALETTE[idx % PALETTE.length],
+      color: pal[idx % pal.length],
       lots: s.total_lots,
     }))
   } else {
@@ -70,7 +90,7 @@ const chartItems = computed(() => {
       name: s.company_name,
       market_value: Number(s.market_value || 0),
       percent: (Number(s.market_value || 0) / totalVal) * 100,
-      color: PALETTE[idx],
+      color: pal[idx % pal.length],
       lots: s.total_lots,
     }))
 
@@ -83,7 +103,7 @@ const chartItems = computed(() => {
       name: `${others.length} emiten lainnya`,
       market_value: othersVal,
       percent: (othersVal / totalVal) * 100,
-      color: PALETTE[5],
+      color: pal[5 % pal.length],
       lots: othersLots,
       isOthers: true,
     })
@@ -115,8 +135,8 @@ function handleItemClick(item) {
 </script>
 
 <template>
-  <!-- ================= COMPACT MODE (UNTUK DASHBOARD) ================= -->
-  <div v-if="compact" class="flex flex-col sm:flex-row items-center gap-3">
+  <!-- ================= COMPACT MODE (UNTUK TABEL ATAU WIDGET KECIL) ================= -->
+  <div v-if="isCompact" class="flex flex-col sm:flex-row items-center gap-3">
     <!-- SVG Donut Ring Mini (Circumference = 100) -->
     <div v-if="chartItems.length > 0" class="relative w-24 h-24 shrink-0">
       <svg viewBox="0 0 42 42" class="w-full h-full" style="transform: rotate(-90deg)">
@@ -197,6 +217,109 @@ function handleItemClick(item) {
       <p v-else class="text-xs text-slate-400 dark:text-zinc-500">
         Belum ada saham aktif
       </p>
+    </div>
+  </div>
+
+  <!-- ================= HERO MODE (UNTUK DASHBOARD HERO BESAR) ================= -->
+  <div v-else-if="isHero" class="w-full flex flex-col items-center justify-center">
+    <!-- Kondisi 1: Ada Saham (Donut Ring + Legenda) -->
+    <div v-if="chartItems.length > 0" class="w-full flex flex-col items-center">
+      <!-- SVG Donut Ring (Circumference = 100) -->
+      <div class="relative w-36 h-36 sm:w-44 sm:h-44 shrink-0">
+        <svg viewBox="0 0 42 42" class="w-full h-full" style="transform: rotate(-90deg)">
+          <!-- Background track ring -->
+          <circle
+            cx="21"
+            cy="21"
+            r="15.91549430918954"
+            fill="transparent"
+            stroke="currentColor"
+            stroke-width="5"
+            class="text-white/15"
+          />
+          <!-- Slices -->
+          <circle
+            v-for="item in chartItems"
+            :key="item.ticker"
+            cx="21"
+            cy="21"
+            r="15.91549430918954"
+            fill="transparent"
+            :stroke="item.color"
+            :stroke-width="hoveredTicker === item.ticker ? 6.8 : 5"
+            :stroke-dasharray="item.dasharray"
+            :stroke-dashoffset="item.dashoffset"
+            stroke-linecap="butt"
+            class="transition-all duration-200 cursor-pointer"
+            @mouseenter="hoveredTicker = item.ticker"
+            @mouseleave="hoveredTicker = null"
+            @click="handleItemClick(item)"
+          >
+            <title>{{ item.ticker }}: {{ item.percent.toFixed(1) }}% ({{ formatCompactRupiah(item.market_value) }})</title>
+          </circle>
+        </svg>
+
+        <!-- Center text inside donut -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-2">
+          <template v-if="activeHoverItem">
+            <span class="text-sm sm:text-base font-extrabold text-[#a1d2af]">
+              {{ activeHoverItem.ticker }}
+            </span>
+            <span class="text-xs sm:text-sm font-bold tabular-nums text-white">
+              {{ activeHoverItem.percent.toFixed(1) }}%
+            </span>
+          </template>
+          <template v-else>
+            <span class="text-xs sm:text-sm lg:text-base font-extrabold text-white tabular-nums">
+              {{ isMasked ? 'Rp ****' : formatCompactRupiah(effectiveTotalMarketValue) }}
+            </span>
+            <span class="text-[9px] font-bold uppercase tracking-wider text-[#a1d2af]">
+              Total Saham
+            </span>
+          </template>
+        </div>
+      </div>
+
+      <!-- Legenda Chip Interaktif Kaca (Glassmorphism) -->
+      <div class="w-full mt-4 flex flex-wrap justify-center gap-1.5 max-h-36 overflow-y-auto">
+        <button
+          v-for="item in chartItems"
+          :key="item.ticker"
+          type="button"
+          @mouseenter="hoveredTicker = item.ticker"
+          @mouseleave="hoveredTicker = null"
+          @click="handleItemClick(item)"
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-all cursor-pointer backdrop-blur-sm active:scale-95"
+          :class="hoveredTicker === item.ticker
+            ? 'bg-white/25 border-white text-white ring-2 ring-[#a1d2af]'
+            : 'bg-white/10 hover:bg-white/20 border-white/15 text-white/90'"
+          :title="item.isOthers ? item.name : `Klik untuk filter saham ${item.ticker}`"
+        >
+          <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: item.color }" />
+          <span class="font-extrabold">{{ item.ticker }}</span>
+          <span class="text-[#a1d2af] font-semibold tabular-nums">{{ item.percent.toFixed(1) }}%</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Kondisi 2: Empty State (Belum ada saham aktif) -->
+    <div v-else class="flex flex-col items-center justify-center text-center py-4">
+      <div class="relative w-24 h-24 mb-2.5 flex items-center justify-center">
+        <div class="w-full h-full rounded-full border-4 border-dashed border-white/20" />
+        <PercentageCircle class="w-8 h-8 text-[#a1d2af]/60 absolute" />
+      </div>
+      <p class="text-xs sm:text-sm font-bold text-white">Belum Ada Saham Aktif</p>
+      <p class="text-[11px] text-white/70 max-w-[200px] mt-0.5">
+        Beli saham pertamamu untuk melihat proporsi portofolio.
+      </p>
+      <button
+        type="button"
+        @click="emit('buy')"
+        class="mt-3 inline-flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-bold bg-white text-[#144229] hover:bg-[#d3e4d8] active:scale-95 transition-all cursor-pointer shadow-sm"
+      >
+        <Plus class="w-3.5 h-3.5 stroke-[2.5]" />
+        <span>Beli Saham</span>
+      </button>
     </div>
   </div>
 

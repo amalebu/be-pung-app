@@ -3,12 +3,10 @@ import { getJakartaTodayStr, JAKARTA_TIMEZONE } from '@/utils/dateUtils'
 
 function getApiBaseUrl() {
   const envUrl = import.meta.env.VITE_API_BASE_URL
-  if (typeof window !== 'undefined' && window.location.hostname.endsWith('github.io')) {
-    if (!envUrl || envUrl.startsWith('/')) {
-      return 'https://9knv83ss-8000.asse.devtunnels.ms/api/v1/personal-app'
-    }
+  if (!envUrl || envUrl.startsWith('/')) {
+    return 'https://dandy-lightgray-sandpiper-04.hostingersite.com/api/v1/personal-app'
   }
-  return envUrl || 'https://9knv83ss-8000.asse.devtunnels.ms/api/v1/personal-app'
+  return envUrl
 }
 
 const api = axios.create({
