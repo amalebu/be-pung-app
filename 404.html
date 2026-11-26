@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>PersonalApp — Dashboard Manajemen Pribadi</title>
+
+    <!-- Fonts: Manrope (Mint & Charcoal Financial) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Prevent FOUC / White Screen Flash on initial load & navigation -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('personal_app_theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark = saved === 'dark' || (!saved && prefersDark);
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.style.backgroundColor = '#101211';
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.documentElement.style.backgroundColor = '#f9f9fc';
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>html,body,#app{background-color:#f9f9fc;min-height:100dvh;margin:0;padding:0}html.dark,html.dark body,html.dark #app{background-color:#101211!important}</style>
+
+    <!-- PWA & Mobile Meta Tags -->
+    <meta name="theme-color" content="#f9f9fc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1c1e" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="PersonalApp" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="apple-touch-icon" href="/be-pung-app/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/be-pung-app/pwa-192x192.png" />
+    <link rel="icon" type="image/svg+xml" href="/be-pung-app/pwa-icon.svg" />
+    <script type="module" crossorigin src="/be-pung-app/assets/index-D4SIvOJi.js"></script>
+    <link rel="modulepreload" crossorigin href="/be-pung-app/assets/api-CggSf3iN.js">
+    <link rel="stylesheet" crossorigin href="/be-pung-app/assets/index-671pn73Z.css">
+  <link rel="manifest" href="/be-pung-app/manifest.webmanifest"></head>
+  <body class="bg-surface text-on-surface dark:bg-zinc-950 dark:text-zinc-100 antialiased selection:bg-primary/20 selection:text-primary select-none">
+    <div id="app"></div>
+  </body>
+</html>
